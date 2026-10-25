@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mon anglais</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Mon anglais">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#EDF1F7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#11151F" media="(prefers-color-scheme: dark)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EDF1F7; --surface:#FFFFFF; --paper:#FCFCF9; --text:#1C2230; --muted:#5B6474;
+  --ink:#1D3C8F; --ink-soft:#E3EAF8; --line:#CFDDF0; --line-strong:#A3BEE2; --margin:#D4435B;
+  --good:#2C7A4B; --good-soft:#E2F2E8; --bad:#C23A50; --bad-soft:#FBE6EA; --border:#D9DFE8;
+  color-scheme: light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#11151F; --surface:#1C2230; --paper:#1A2030; --text:#E8EBF1; --muted:#A1A9B8;
+    --ink:#A4BCFF; --ink-soft:#26304A; --line:#28324A; --line-strong:#38466A; --margin:#E46C80;
+    --good:#62C98F; --good-soft:#1C3328; --bad:#F07A8D; --bad-soft:#3A1F27; --border:#2E3647;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#11151F; --surface:#1C2230; --paper:#1A2030; --text:#E8EBF1; --muted:#A1A9B8;
+  --ink:#A4BCFF; --ink-soft:#26304A; --line:#28324A; --line-strong:#38466A; --margin:#E46C80;
+  --good:#62C98F; --good-soft:#1C3328; --bad:#F07A8D; --bad-soft:#3A1F27; --border:#2E3647;
+  color-scheme: dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text);font-family:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:17px;line-height:1.5;-webkit-tap-highlight-color:transparent}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.hand{font-family:"Caveat","Segoe Print","Bradley Hand",cursive}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding:14px 20px 10px}
+.head-inner{max-width:640px;margin:0 auto;display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+h1{font-family:"Caveat",cursive;font-weight:700;font-size:2.1rem;line-height:1;margin:0;color:var(--ink)}
+.stats{font-size:.88rem;color:var(--muted);text-align:right}
+.stats strong{color:var(--text)}
+
+main{max-width:640px;margin:0 auto;padding:8px 20px 110px}
+section[hidden]{display:none}
+h2{font-size:1.25rem;margin:8px 0 12px}
+p{margin:0 0 12px}
+.muted{color:var(--muted)}
+.small{font-size:.88rem}
+
+.btn{border:1.5px solid var(--border);background:var(--surface);border-radius:12px;padding:12px 16px;font-weight:700;min-height:48px}
+.btn.primary{background:var(--ink);border-color:var(--ink);color:var(--surface)}
+.btn.ghost{background:transparent}
+.btn:disabled{opacity:.5;cursor:default}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row > .btn{flex:1}
+
+/* The notebook card — the one bold element */
+.card{position:relative;background-color:var(--paper);
+  background-image:linear-gradient(var(--line-strong) 1px,transparent 1px),linear-gradient(var(--line) 1px,transparent 1px);
+  background-size:100% 36px,100% 9px;background-position:0 8px,0 8px;
+  border-radius:6px 18px 18px 6px;border:1px solid var(--border);
+  padding:26px 22px 26px 64px;min-height:300px;display:flex;flex-direction:column;justify-content:center;
+  cursor:pointer;user-select:none;box-shadow:0 1px 0 var(--border)}
+.card::before{content:"";position:absolute;top:0;bottom:0;left:46px;width:2px;background:var(--margin);opacity:.8}
+.card .en{font-family:"Caveat",cursive;font-weight:700;font-size:clamp(2.4rem,9vw,3.4rem);line-height:1.05;color:var(--ink);margin:0}
+.card .fr{font-size:1.3rem;font-weight:700;margin:18px 0 6px}
+.card .ex{font-family:"Caveat",cursive;font-size:1.55rem;line-height:1.2;color:var(--ink);opacity:.85;margin:0}
+.card .hint{position:absolute;bottom:12px;right:18px;font-size:.85rem;color:var(--muted)}
+.card .say{position:absolute;top:12px;right:12px}
+.icon-btn{border:1.5px solid var(--border);background:var(--surface);border-radius:999px;width:44px;height:44px;display:inline-grid;place-items:center;font-size:1.1rem;padding:0}
+.progress{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin:4px 0 14px}
+.progress > i{display:block;height:100%;background:var(--ink);transition:width .25s}
+.grades{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.grades .btn{padding:10px 6px;font-size:.95rem;line-height:1.2}
+.grades .btn span{display:block;font-weight:400;font-size:.78rem;color:var(--muted)}
+.g-again{border-color:var(--bad)!important;color:var(--bad)}
+.g-easy{background:var(--ink)!important;border-color:var(--ink)!important;color:var(--surface)!important}
+.g-easy span{color:inherit!important;opacity:.8}
+
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:16px}
+.empty{text-align:center;padding:32px 18px}
+.empty .big{font-family:"Caveat",cursive;font-size:2.4rem;color:var(--ink);line-height:1;margin-bottom:8px}
+
+/* Quiz */
+.q-prompt{font-size:.9rem;color:var(--muted);margin-bottom:4px}
+.q-word{font-family:"Caveat",cursive;font-weight:700;font-size:2.6rem;line-height:1.1;color:var(--ink);margin:0 0 16px}
+.options{display:grid;gap:10px}
+.opt{text-align:left;border:1.5px solid var(--border);background:var(--surface);border-radius:12px;padding:14px 16px;min-height:52px}
+.opt.right{border-color:var(--good);background:var(--good-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.score{font-family:"Caveat",cursive;font-size:4rem;line-height:1;color:var(--ink)}
+
+/* Words */
+label{display:block;font-size:.9rem;font-weight:700;margin:10px 0 4px}
+input[type=text],input[type=search],select,textarea{width:100%;border:1.5px solid var(--border);background:var(--bg);border-radius:10px;padding:11px 12px;min-height:46px}
+textarea{resize:vertical;min-height:52px}
+.words{list-style:none;margin:0;padding:0}
+.words li{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.words li:last-child{border-bottom:0}
+.words .w{flex:1;min-width:0}
+.words .w b{font-family:"Caveat",cursive;font-size:1.6rem;line-height:1;color:var(--ink);font-weight:700}
+.words .w div{color:var(--muted);font-size:.92rem;overflow-wrap:anywhere}
+.dots{display:inline-flex;gap:3px;vertical-align:middle;margin-left:8px}
+.dots i{width:6px;height:6px;border-radius:50%;background:var(--line-strong)}
+.dots i.on{background:var(--good)}
+.del{border:0;background:transparent;color:var(--muted);font-size:1.3rem;width:40px;height:40px;border-radius:999px}
+.gen-list{list-style:none;padding:0;margin:12px 0}
+.gen-list li{display:flex;gap:10px;align-items:flex-start;padding:8px 0}
+.gen-list input{margin-top:6px;width:20px;height:20px}
+
+/* Chat */
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 4px}
+.chip{border:1.5px solid var(--border);background:var(--surface);border-radius:999px;padding:8px 14px;font-size:.92rem}
+.chip.on{background:var(--ink-soft);border-color:var(--ink);color:var(--ink);font-weight:700}
+.chat{display:flex;flex-direction:column;gap:12px;margin:16px 0}
+.msg{max-width:88%;padding:12px 14px;border-radius:16px;overflow-wrap:anywhere}
+.msg.tutor{align-self:flex-start;background:var(--surface);border:1px solid var(--border);border-bottom-left-radius:4px}
+.msg.me{align-self:flex-end;background:var(--ink);color:var(--surface);border-bottom-right-radius:4px}
+.msg .tools{display:flex;gap:12px;margin-top:8px}
+.linkish{border:0;background:none;padding:4px 0;color:var(--ink);font-size:.88rem;font-weight:700}
+.trans{margin-top:6px;color:var(--muted);font-size:.92rem}
+.fix{align-self:flex-end;max-width:88%;background:var(--good-soft);border:1px solid var(--good);border-radius:12px;padding:10px 12px;font-size:.92rem}
+.fix b{display:block;color:var(--good)}
+.composer{display:flex;gap:10px;align-items:flex-end}
+.composer textarea{flex:1}
+.err{color:var(--bad);font-size:.92rem;margin:8px 0}
+
+.lvl{display:inline-block;font-size:.72rem;font-weight:700;color:var(--ink);background:var(--ink-soft);border-radius:6px;padding:1px 6px;margin-left:8px;vertical-align:middle}
+.levels{display:grid;gap:10px}
+.level-opt{display:flex;gap:14px;align-items:center;text-align:left;border:1.5px solid var(--border);background:var(--surface);border-radius:14px;padding:12px 14px;min-height:60px}
+.level-opt .code{font-family:"Caveat",cursive;font-weight:700;font-size:2rem;line-height:1;color:var(--ink);min-width:44px}
+.level-opt small{display:block;color:var(--muted);font-size:.85rem}
+nav{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--border);padding-bottom:env(safe-area-inset-bottom,0px)}
+nav .inner{max-width:640px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+nav button{border:0;background:none;padding:10px 4px 12px;font-size:.82rem;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:2px;min-height:60px}
+nav button .ic{font-size:1.3rem;line-height:1}
+nav button[aria-current="page"]{color:var(--ink);font-weight:700}
+.badge{display:inline-block;min-width:18px;padding:0 5px;border-radius:9px;background:var(--margin);color:#fff;font-size:.7rem;line-height:18px;margin-left:2px}
+.sync{font-size:.8rem;color:var(--muted);text-align:center;margin-top:20px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="head-inner">
+    <h1>Mon anglais</h1>
+    <div class="stats" id="stats"></div>
+  </div>
+</header>
+
+<main>
+  <section id="tab-reviser"></section>
+  <section id="tab-quiz" hidden></section>
+  <section id="tab-mots" hidden></section>
+  <section id="tab-parler" hidden></section>
+  <p class="sync" id="sync"></p>
+</main>
+
+<nav aria-label="Sections">
+  <div class="inner">
+    <button data-tab="reviser"><span class="ic">✎</span><span>Réviser <span id="due-badge"></span></span></button>
+    <button data-tab="quiz"><span class="ic">?</span><span>Quiz</span></button>
+    <button data-tab="mots"><span class="ic">≡</span><span>Mes mots</span></button>
+    <button data-tab="parler"><span class="ic">💬</span><span>Parler</span></button>
+  </div>
+</nav>
+
+<script>
+(function(){
+'use strict';
+const DAY = 86400000;
+const INTERVALS = [0, 1, 2, 4, 9, 21, 45]; // jours par niveau
+const PACKS = {
+B1: [
+["to look forward to","avoir hâte de","I’m looking forward to the weekend."],
+["actually","en fait (faux ami : pas « actuellement »)","Actually, I’ve never been to London."],
+["to get along with","bien s’entendre avec","I get along with my neighbours."],
+["eventually","finalement, à la longue","Eventually, she found her keys."],
+["to run out of","ne plus avoir de","We’ve run out of milk."],
+["a bargain","une bonne affaire","This jacket was a real bargain."],
+["to figure out","comprendre, trouver","I can’t figure out this problem."],
+["currently","actuellement","I’m currently living in France."],
+["to be about to","être sur le point de","The train is about to leave."],
+["to give up","abandonner","Don’t give up, you’re nearly there!"],
+["a library","une bibliothèque (faux ami)","I borrowed this book from the library."],
+["to rely on","compter sur","You can rely on me."],
+["to look for","chercher","I’m looking for my glasses."],
+["sensible","raisonnable (faux ami)","That’s a sensible decision."],
+["to remind","rappeler (à quelqu’un)","Remind me to call my mum."],
+["to borrow","emprunter","Can I borrow your pen?"],
+["to lend","prêter","Could you lend me ten euros?"],
+["a receipt","un ticket de caisse, un reçu","Keep the receipt, just in case."],
+["to book","réserver","I booked a table for two."],
+["to wonder","se demander","I wonder if it will rain."],
+["although","bien que","Although it was cold, we went out."],
+["to turn up","arriver, se pointer","He turned up late again."],
+["a skill","une compétence","Cooking is a useful skill."],
+["to improve","améliorer, progresser","I want to improve my English."],
+["to be worth it","en valoir la peine","The trip was long but worth it."],
+["to get used to","s’habituer à","I’m getting used to my new job."],
+["meanwhile","pendant ce temps","Meanwhile, the soup was boiling."],
+["to complain","se plaindre","He always complains about the weather."],
+["a fee","des frais","There’s a small fee for delivery."],
+["to afford","avoir les moyens de","I can’t afford a new car."],
+["likely","probable","It’s likely to snow tomorrow."],
+["to deal with","gérer, s’occuper de","I’ll deal with it tomorrow."],
+["to pretend","faire semblant (faux ami)","She pretended not to see me."],
+["to attend","assister à (faux ami)","I attended the meeting this morning."],
+["a coworker","un collègue","My coworker brought cakes."],
+["to bring up","aborder (un sujet)","Don’t bring up politics at dinner."],
+["nearly","presque","I nearly missed the bus."],
+["to share","partager","Let’s share a pizza."],
+["to catch up","prendre des nouvelles, rattraper","Let’s catch up over coffee."],
+["tired","fatigué","I’m too tired to go out tonight."]
+],
+A1: [
+["a family","une famille","I live with my family."],
+["a brother","un frère","My brother is ten."],
+["to eat","manger","We eat at seven."],
+["to drink","boire","I drink water every day."],
+["a house","une maison","Our house is small."],
+["big","grand","It’s a big city."],
+["small","petit","I have a small dog."],
+["today","aujourd’hui","Today is Monday."],
+["tomorrow","demain","See you tomorrow!"],
+["to like","aimer (bien)","I like chocolate."],
+["a friend","un ami, une amie","She is my best friend."],
+["to work","travailler","I work in a shop."],
+["a job","un travail, un emploi","I love my job."],
+["hungry","avoir faim (to be hungry)","I’m hungry."],
+["thirsty","avoir soif (to be thirsty)","Are you thirsty?"],
+["the weather","le temps (météo)","The weather is nice today."],
+["to go","aller","I go to school by bus."],
+["a car","une voiture","My car is red."],
+["cheap","pas cher","This shirt is cheap."],
+["expensive","cher","London is expensive."],
+["to buy","acheter","I want to buy some bread."],
+["a week","une semaine","I go swimming twice a week."],
+["often","souvent","I often read in bed."],
+["never","jamais","I never drink coffee."],
+["a room","une pièce, une chambre","My room is upstairs."]
+],
+A2: [
+["to travel","voyager","I love travelling by train."],
+["a trip","un voyage, une excursion","We went on a trip to Scotland."],
+["to wait for","attendre","I’m waiting for the bus."],
+["to forget","oublier","Don’t forget your umbrella."],
+["to need","avoir besoin de","I need a new phone."],
+["busy","occupé","I’m very busy this week."],
+["to try","essayer","Try this cake, it’s delicious!"],
+["already","déjà","I’ve already eaten."],
+["yet","encore (négatif), déjà (question)","I haven’t finished yet."],
+["to spend","dépenser, passer (du temps)","I spent the weekend at home."],
+["a neighbour","un voisin, une voisine","Our neighbour has a cat."],
+["to explain","expliquer","Can you explain this word?"],
+["to arrive","arriver","The plane arrives at six."],
+["to leave","partir, quitter","I leave home at eight."],
+["a bill","une addition, une facture","Can we have the bill, please?"],
+["a meal","un repas","Breakfast is my favourite meal."],
+["to decide","décider","I can’t decide what to wear."],
+["outside","dehors","Let’s eat outside."],
+["to feel","se sentir, ressentir","I feel much better today."],
+["a ticket","un billet","I bought two tickets for the concert."],
+["to change","changer","I need to change trains in Lyon."],
+["noisy","bruyant","The street is very noisy."],
+["to rent","louer","We rent a flat in the city centre."],
+["to send","envoyer","I’ll send you a message."],
+["boring","ennuyeux","The film was boring."]
+],
+B2: [
+["to take for granted","considérer comme acquis","Don’t take your health for granted."],
+["to come up with","trouver (une idée)","She came up with a great plan."],
+["a drawback","un inconvénient","The main drawback is the price."],
+["to put off","repousser, remettre à plus tard","I keep putting off my homework."],
+["overwhelming","accablant, écrasant","The amount of work was overwhelming."],
+["to cope with","faire face à","How do you cope with stress?"],
+["to point out","faire remarquer","He pointed out a mistake in my report."],
+["a shortcoming","un défaut, une lacune","Every plan has its shortcomings."],
+["to look into","examiner, se pencher sur","We’ll look into the problem."],
+["whereas","alors que, tandis que","I love tea, whereas my wife prefers coffee."],
+["to carry out","réaliser, mener à bien","They carried out a survey."],
+["reliable","fiable","Is this car reliable?"],
+["to keep up with","suivre le rythme de","It’s hard to keep up with the news."],
+["a breakthrough","une avancée majeure","Scientists have made a breakthrough."],
+["to be fed up with","en avoir marre de","I’m fed up with the rain."],
+["to weigh up","peser (le pour et le contre)","Weigh up the pros and cons."],
+["thoroughly","minutieusement, complètement","Read the contract thoroughly."],
+["to stand out","se démarquer","Her CV really stands out."],
+["an outcome","un résultat, une issue","We’re happy with the outcome."],
+["to turn down","refuser, décliner","He turned down the job offer."],
+["to run into","tomber sur (quelqu’un)","I ran into an old friend yesterday."],
+["eager","impatient, désireux","She’s eager to learn."],
+["to make up one’s mind","se décider","I can’t make up my mind."],
+["nevertheless","néanmoins","It was risky; nevertheless, we did it."]
+],
+C1: [
+["to undermine","saper, affaiblir","The scandal undermined public trust."],
+["a pitfall","un piège, un écueil","Avoid the common pitfalls."],
+["to be on the fence","hésiter, ne pas trancher","I’m still on the fence about it."],
+["far-fetched","tiré par les cheveux","His excuse was a bit far-fetched."],
+["to hinder","entraver, gêner","Bad weather hindered the rescue."],
+["to dwell on","ressasser","Don’t dwell on your mistakes."],
+["a setback","un revers, un contretemps","The project suffered a setback."],
+["compelling","convaincant","She made a compelling argument."],
+["to bear in mind","garder à l’esprit","Bear in mind that it closes early."],
+["to streamline","simplifier, rationaliser","We streamlined the process."],
+["notwithstanding","malgré, nonobstant","Notwithstanding the cost, it’s worth it."],
+["to get the hang of","prendre le coup de main","You’ll soon get the hang of it."],
+["a rule of thumb","une règle empirique","As a rule of thumb, save 10% of your salary."],
+["to tackle","s’attaquer à","We need to tackle this issue now."],
+["inconspicuous","discret, qui passe inaperçu","He tried to remain inconspicuous."],
+["to second-guess","remettre en question après coup","Stop second-guessing every decision."],
+["thought-provoking","qui fait réfléchir","It was a thought-provoking film."],
+["to fall through","tomber à l’eau","Our holiday plans fell through."],
+["a blessing in disguise","un mal pour un bien","Losing that job was a blessing in disguise."],
+["to iron out","aplanir, régler","We need to iron out a few details."],
+["unprecedented","sans précédent","The crisis was unprecedented."],
+["to cut corners","bâcler, rogner sur la qualité","Don’t cut corners on safety."]
+],
+C2: [
+["to beat around the bush","tourner autour du pot","Stop beating around the bush."],
+["ubiquitous","omniprésent","Smartphones are ubiquitous."],
+["to pay lip service to","soutenir du bout des lèvres","They only pay lip service to equality."],
+["a red herring","une fausse piste","That clue was a red herring."],
+["serendipity","un heureux hasard","We met by pure serendipity."],
+["to bite the bullet","serrer les dents, se résoudre","I bit the bullet and called the bank."],
+["to placate","apaiser, calmer","He tried to placate the angry customer."],
+["quintessential","par excellence","It’s the quintessential English pub."],
+["to muddle through","se débrouiller tant bien que mal","We muddled through without a map."],
+["to gloss over","passer sous silence","The report glosses over the risks."],
+["a moot point","une question devenue sans intérêt","Whether we go is a moot point now."],
+["disingenuous","de mauvaise foi, hypocrite","His apology seemed disingenuous."],
+["to have a chip on one’s shoulder","être aigri, garder de la rancœur","He’s had a chip on his shoulder since school."],
+["to tread carefully","avancer avec prudence","Tread carefully when you mention it."],
+["erstwhile","d’autrefois, ancien","My erstwhile colleague is now my boss."],
+["to rein in","freiner, maîtriser","The government must rein in spending."],
+["a double-edged sword","une arme à double tranchant","Fame is a double-edged sword."],
+["to be at loggerheads","être en désaccord total","The two parties are at loggerheads."],
+["perfunctory","de pure forme, superficiel","He gave a perfunctory nod."],
+["to take with a pinch of salt","prendre avec des pincettes","Take his advice with a pinch of salt."]
+]
+};
+const LEVEL_KEYS = ["A1","A2","B1","B2","C1","C2"];
+const LEVELS = {
+  A1: { name: "Découverte", fr: "Mots et phrases très simples du quotidien.", en: "CEFR A1, complete beginner. Use very short, simple sentences in the present tense and only very common words. Correct only the most important mistake, gently." },
+  A2: { name: "Survie", fr: "Situations courantes : courses, transports, se présenter.", en: "CEFR A2, elementary. Use short, simple sentences and everyday vocabulary (present, past simple, going to). Correct only clear mistakes, gently." },
+  B1: { name: "Seuil", fr: "Se débrouiller en voyage, raconter, donner son avis simplement.", en: "CEFR B1, intermediate. Use clear everyday English with a range of tenses and a few common phrasal verbs." },
+  B2: { name: "Avancé", fr: "Discussions fluides, argumenter, nuancer.", en: "CEFR B2, upper intermediate. Use natural, fluent English with phrasal verbs and some idioms; invite opinions and arguments." },
+  C1: { name: "Autonome", fr: "Langage précis et nuancé, expressions idiomatiques.", en: "CEFR C1, advanced. Use rich, nuanced English with idioms and precise vocabulary; also correct awkward or unnatural phrasing." },
+  C2: { name: "Maîtrise", fr: "Finesse, registres de langue, idiomes rares.", en: "CEFR C2, proficient. Speak as with a near-native speaker: sophisticated vocabulary, idioms, subtle register; be demanding in corrections, including style." }
+};
+const LS_KEY = 'mon-anglais-v1';
+
+const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
+const mkWord = (en, fr, ex, lvl) => ({ id: uid(), en, fr, ex: ex || '', box: 0, due: 0, seen: 0, lvl: lvl || '' });
+const freshState = () => ({
+  v: 2, updatedAt: Date.now(), words: [], packs: [],
+  stats: { streak: 0, lastDay: null, todayDay: null, todayCount: 0 },
+  settings: { accent: 'en-GB', level: null }
+});
+function migrate(s){
+  if (!s || !s.words) return null;
+  if (!s.packs) s.packs = [];
+  if (!s.settings) s.settings = { accent: 'en-GB', level: null };
+  const map = { 'Débutant': 'A2', 'Intermédiaire': 'B1', 'Avancé': 'B2' };
+  if (map[s.settings.level]) s.settings.level = map[s.settings.level];
+  if ((s.v || 1) < 2){
+    const b1 = new Set(PACKS.B1.map(w => w[0]));
+    s.words.forEach(w => { if (!w.lvl && b1.has(w.en)) w.lvl = 'B1'; });
+    if (s.words.some(w => w.lvl === 'B1') && !s.packs.includes('B1')) s.packs.push('B1');
+    s.v = 2;
+  }
+  return s;
+}
+function addPack(l){
+  const have = new Set(state.words.map(w => w.en.toLowerCase()));
+  let n = 0;
+  PACKS[l].forEach(w => { if (!have.has(w[0].toLowerCase())){ state.words.push(mkWord(w[0], w[1], w[2], l)); n++; } });
+  if (!state.packs.includes(l)) state.packs.push(l);
+  return n;
+}
+function lvl(){ return state.settings.level || 'B1'; }
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ymd = t => { const d = new Date(t); return d.getFullYear() + '-' + (d.getMonth()+1) + '-' + d.getDate(); };
+const $ = id => document.getElementById(id);
+
+// ---------- Stockage ----------
+function loadLocal(){ try { const s = localStorage.getItem(LS_KEY); return s ? JSON.parse(s) : null; } catch(e){ return null; } }
+let state = migrate(loadLocal()) || freshState();
+let ref = null, saving = false, pending = false, saveTimer = null;
+
+function save(){
+  state.updatedAt = Date.now();
+  try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch(e){}
+  if (ref){ clearTimeout(saveTimer); saveTimer = setTimeout(flush, 800); }
+  renderStats();
+}
+async function flush(){
+  if (!ref) return;
+  if (saving){ pending = true; return; }
+  saving = true;
+  try { await ref.set({ state: JSON.parse(JSON.stringify(state)) }); setSync('Progression synchronisée sur ton compte Claude.'); }
+  catch(e){ setSync('Synchronisation impossible pour le moment. Ta progression reste enregistrée sur cet appareil.'); }
+  saving = false;
+  if (pending){ pending = false; flush(); }
+}
+function setSync(t){ $('sync').textContent = t; }
+setSync('Version hors ligne. Ta progression est enregistrée sur cet appareil.');
+
+async function initRemote(){
+  if (!window.claude || !window.claude.use) return;
+  try {
+    const [db, user] = await Promise.all([claude.use('db'), claude.use('user')]);
+    if (!db || !user) return;
+    const id = await user.id();
+    if (!id) return;
+    const r = db.collection('data/users/' + id).doc('progress');
+    const snap = await r.get();
+    ref = r;
+    const remote = snap.exists ? (snap.data() || {}).state : null;
+    if (remote && remote.words && (remote.updatedAt || 0) >= (state.updatedAt || 0)){
+      state = migrate(JSON.parse(JSON.stringify(remote))) || state;
+      try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch(e){}
+      session = null; quiz = null;
+      renderAll();
+      setSync('Progression synchronisée sur ton compte Claude.');
+    } else {
+      flush();
+    }
+  } catch(e){ /* reste en local */ }
+}
+
+// ---------- Voix ----------
+function speak(text){
+  if (!('speechSynthesis' in window) || !text) return;
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = state.settings.accent;
+  const v = speechSynthesis.getVoices().find(v => v.lang && v.lang.replace('_','-').toLowerCase().startsWith(state.settings.accent.toLowerCase()));
+  if (v) u.voice = v;
+  u.rate = 0.92;
+  speechSynthesis.cancel(); speechSynthesis.speak(u);
+}
+const canSpeak = 'speechSynthesis' in window;
+
+// ---------- Stats ----------
+function dueWords(){ const now = Date.now(); return state.words.filter(w => w.due <= now); }
+function markActivity(){
+  const today = ymd(Date.now()), yesterday = ymd(Date.now() - DAY), s = state.stats;
+  if (s.lastDay !== today){ s.streak = (s.lastDay === yesterday) ? s.streak + 1 : 1; s.lastDay = today; }
+  if (s.todayDay !== today){ s.todayDay = today; s.todayCount = 0; }
+  s.todayCount++;
+}
+function renderStats(){
+  const s = state.stats, today = ymd(Date.now()), yesterday = ymd(Date.now() - DAY);
+  const streak = (s.lastDay === today || s.lastDay === yesterday) ? s.streak : 0;
+  const count = s.todayDay === today ? s.todayCount : 0;
+  $('stats').innerHTML = (state.settings.level ? 'Niveau <strong>' + state.settings.level + '</strong><br>' : '') + '<strong>' + streak + '</strong> jour' + (streak > 1 ? 's' : '') + ' de suite<br><strong>' + count + '</strong> révision' + (count > 1 ? 's' : '') + ' aujourd’hui';
+  const n = dueWords().length;
+  $('due-badge').innerHTML = n ? '<span class="badge">' + (n > 99 ? '99+' : n) + '</span>' : '';
+}
+
+// ---------- Onglets ----------
+const TABS = ['reviser','quiz','mots','parler'];
+let current = 'reviser';
+function show(tab){
+  if (!TABS.includes(tab)) tab = 'reviser';
+  current = tab;
+  TABS.forEach(t => { $('tab-' + t).hidden = t !== tab; });
+  document.querySelectorAll('nav button').forEach(b => b.setAttribute('aria-current', b.dataset.tab === tab ? 'page' : 'false'));
+  render(tab);
+  window.scrollTo(0, 0);
+}
+function render(tab){ ({ reviser: renderReview, quiz: renderQuiz, mots: renderWords, parler: renderChat })[tab](); }
+function renderAll(){ renderStats(); render(current); }
+document.querySelector('nav').addEventListener('click', e => { const b = e.target.closest('button[data-tab]'); if (b) show(b.dataset.tab); });
+window.addEventListener('hashchange', () => { const t = location.hash.slice(1); if (TABS.includes(t) && t !== current) show(t); });
+
+// ---------- Révision ----------
+let session = null;
+function startSession(){
+  const due = dueWords();
+  const old = due.filter(w => w.seen > 0).sort((a,b) => a.due - b.due);
+  const fresh = due.filter(w => w.seen === 0).slice(0, 8);
+  const queue = old.concat(fresh).slice(0, 20).map(w => w.id);
+  session = { queue, idx: 0, revealed: false, total: queue.length, done: 0 };
+}
+function renderReview(){
+  const el = $('tab-reviser');
+  if (placement){ el.innerHTML = placementHTML(); return; }
+  if (!state.settings.level){ el.innerHTML = levelPicker(); return; }
+  if (!session || session.idx >= session.queue.length){
+    if (session && session.done > 0){
+      el.innerHTML = '<div class="panel empty"><div class="big">Bien joué !</div><p>' + session.done + ' carte' + (session.done > 1 ? 's' : '') + ' révisée' + (session.done > 1 ? 's' : '') + '. Les mots reviendront au bon moment.</p>' + nextInfo() +
+        '<div class="row" style="margin-top:16px">' + (dueWords().length ? '<button class="btn primary" data-act="start">Continuer (' + dueWords().length + ')</button>' : '') + '<button class="btn" data-act="goto" data-to="quiz">Faire un quiz</button></div></div>';
+      return;
+    }
+    const n = dueWords().length;
+    if (!n){
+      el.innerHTML = '<div class="panel empty"><div class="big">Tout est à jour</div><p>Aucun mot à réviser pour le moment.</p>' + nextInfo() +
+        '<div class="row" style="margin-top:16px"><button class="btn" data-act="goto" data-to="quiz">Faire un quiz</button><button class="btn" data-act="goto" data-to="mots">Ajouter des mots</button></div></div>';
+      return;
+    }
+    startSession();
+  }
+  const w = state.words.find(x => x.id === session.queue[session.idx]);
+  if (!w){ session.idx++; return renderReview(); }
+  const pct = Math.round(100 * session.done / Math.max(1, session.total));
+  el.innerHTML =
+    '<div class="progress" aria-hidden="true"><i style="width:' + pct + '%"></i></div>' +
+    '<div class="card" data-act="reveal" role="button" tabindex="0" aria-label="Retourner la carte">' +
+      (canSpeak ? '<button class="icon-btn say" data-act="say" data-text="' + esc(w.en) + '" aria-label="Écouter">🔊</button>' : '') +
+      '<p class="en">' + esc(w.en) + '</p>' +
+      (session.revealed
+        ? '<p class="fr">' + esc(w.fr) + '</p>' + (w.ex ? '<p class="ex">' + esc(w.ex) + '</p>' : '')
+        : '<span class="hint">Touche pour voir la traduction</span>') +
+    '</div>' +
+    (session.revealed
+      ? '<div class="grades">' +
+          '<button class="btn g-again" data-act="grade" data-g="again">Je ne savais pas<span>dans 1 min</span></button>' +
+          '<button class="btn" data-act="grade" data-g="hard">Difficile<span>' + label(planned(w,'hard')) + '</span></button>' +
+          '<button class="btn g-easy" data-act="grade" data-g="easy">Facile<span>' + label(planned(w,'easy')) + '</span></button>' +
+        '</div>'
+      : '<div class="row" style="margin-top:14px"><button class="btn primary" data-act="reveal">Voir la traduction</button></div>') +
+    '<p class="muted small" style="margin-top:12px">Carte ' + (session.idx + 1) + ' sur ' + session.queue.length + '</p>';
+}
+function planned(w, g){
+  if (g === 'hard'){ const b = Math.max(1, w.box); return Math.max(1, Math.round(INTERVALS[b] / 2)); }
+  return INTERVALS[Math.min(INTERVALS.length - 1, w.box + 1)];
+}
+function label(d){ return d <= 1 ? 'demain' : 'dans ' + d + ' jours'; }
+function nextInfo(){
+  const future = state.words.filter(w => w.due > Date.now()).map(w => w.due).sort((a,b) => a - b)[0];
+  if (!future) return '';
+  const d = Math.round((future - Date.now()) / DAY);
+  return '<p class="muted small">Prochaine révision : ' + (d < 1 ? 'aujourd’hui, un peu plus tard' : d === 1 ? 'demain' : 'dans ' + d + ' jours') + '.</p>';
+}
+function grade(g){
+  const w = state.words.find(x => x.id === session.queue[session.idx]);
+  const now = Date.now();
+  w.seen++;
+  if (g === 'again'){ w.box = 0; w.due = now + 60000; session.queue.push(w.id); }
+  else if (g === 'hard'){ const d = planned(w, 'hard'); w.box = Math.max(1, w.box); w.due = now + d * DAY; session.done++; }
+  else { const d = planned(w, 'easy'); w.box = Math.min(INTERVALS.length - 1, w.box + 1); w.due = now + d * DAY; session.done++; }
+  markActivity();
+  session.idx++; session.revealed = false;
+  save(); renderReview();
+}
+
+// ---------- Quiz ----------
+let quiz = null;
+function shuffle(a){ a = a.slice(); for (let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function newQuiz(){
+  const pool = shuffle(state.words).slice(0, 10);
+  quiz = { i: 0, score: 0, answered: null, missed: [], qs: pool.map((w, k) => {
+    const dir = k % 2 ? 'fr-en' : 'en-fr';
+    const others = shuffle(state.words.filter(x => x.id !== w.id)).slice(0, 3);
+    return { id: w.id, dir, prompt: dir === 'en-fr' ? w.en : w.fr, answer: dir === 'en-fr' ? w.fr : w.en,
+      options: shuffle([w].concat(others)).map(x => dir === 'en-fr' ? x.fr : x.en) };
+  }) };
+}
+function renderQuiz(){
+  const el = $('tab-quiz');
+  if (state.words.length < 4){ el.innerHTML = '<div class="panel empty"><div class="big">Pas assez de mots</div><p>Il faut au moins 4 mots pour lancer un quiz.</p><button class="btn primary" data-act="goto" data-to="mots">Ajouter des mots</button></div>'; return; }
+  if (!quiz){
+    el.innerHTML = '<div class="panel empty"><div class="big">Quiz express</div><p>10 questions, dans les deux sens. Les mots ratés reviennent dans ta prochaine révision.</p><button class="btn primary" data-act="quiz-start">Commencer le quiz</button></div>';
+    return;
+  }
+  if (quiz.i >= quiz.qs.length){
+    el.innerHTML = '<div class="panel empty"><div class="score">' + quiz.score + '/' + quiz.qs.length + '</div><p>' +
+      (quiz.score === quiz.qs.length ? 'Sans faute !' : quiz.missed.length + ' mot' + (quiz.missed.length > 1 ? 's' : '') + ' à revoir, ajouté' + (quiz.missed.length > 1 ? 's' : '') + ' à ta révision.') +
+      '</p><div class="row"><button class="btn primary" data-act="quiz-start">Recommencer</button>' + (quiz.missed.length ? '<button class="btn" data-act="goto" data-to="reviser">Réviser maintenant</button>' : '') + '</div></div>';
+    return;
+  }
+  const q = quiz.qs[quiz.i];
+  const pct = Math.round(100 * quiz.i / quiz.qs.length);
+  el.innerHTML = '<div class="progress" aria-hidden="true"><i style="width:' + pct + '%"></i></div>' +
+    '<div class="panel"><div class="q-prompt">' + (q.dir === 'en-fr' ? 'Que veut dire :' : 'Comment dit-on en anglais :') + '</div>' +
+    '<p class="q-word"' + (q.dir === 'fr-en' ? ' style="font-family:inherit;font-size:1.5rem;color:var(--text)"' : '') + '>' + esc(q.prompt) + '</p>' +
+    '<div class="options">' + q.options.map((o, k) => {
+      let cls = 'opt';
+      if (quiz.answered !== null){ if (o === q.answer) cls += ' right'; else if (k === quiz.answered) cls += ' wrong'; }
+      return '<button class="' + cls + '" data-act="answer" data-k="' + k + '"' + (quiz.answered !== null ? ' disabled' : '') + '>' + esc(o) + '</button>';
+    }).join('') + '</div>' +
+    (quiz.answered !== null ? '<div class="row" style="margin-top:14px">' + (canSpeak ? '<button class="btn ghost" data-act="say" data-text="' + esc(q.dir === 'en-fr' ? q.prompt : q.answer) + '">🔊 Écouter</button>' : '') + '<button class="btn primary" data-act="quiz-next">' + (quiz.i === quiz.qs.length - 1 ? 'Voir mon score' : 'Question suivante') + '</button></div>' : '') +
+    '</div><p class="muted small">Question ' + (quiz.i + 1) + ' sur ' + quiz.qs.length + '</p>';
+}
+function answer(k){
+  const q = quiz.qs[quiz.i];
+  quiz.answered = k;
+  if (q.options[k] === q.answer) quiz.score++;
+  else { quiz.missed.push(q.id); const w = state.words.find(x => x.id === q.id); if (w){ w.due = Date.now(); w.box = Math.min(w.box, 1); save(); } }
+  renderQuiz();
+}
+
+// ---------- Mes mots ----------
+let filter = '', gen = null, sample = null, sampleChecked = false;
+function renderWords(){
+  const el = $('tab-mots');
+  if (placement){ el.innerHTML = placementHTML(); return; }
+  const list = state.words.filter(w => !filter || (w.en + ' ' + w.fr).toLowerCase().includes(filter.toLowerCase()))
+    .sort((a,b) => a.en.replace(/^(to |a |an )/,'').localeCompare(b.en.replace(/^(to |a |an )/,'')));
+  el.innerHTML = levelPanel() +
+    '<div class="panel"><h2 style="margin-top:0">Ajouter un mot</h2>' +
+      '<label for="f-en">En anglais</label><input type="text" id="f-en" autocomplete="off" autocapitalize="none" placeholder="to look forward to">' +
+      '<label for="f-fr">En français</label><input type="text" id="f-fr" autocomplete="off" placeholder="avoir hâte de">' +
+      '<label for="f-ex">Exemple (facultatif)</label><input type="text" id="f-ex" autocomplete="off" placeholder="I’m looking forward to it.">' +
+      '<div class="row" style="margin-top:14px"><button class="btn primary" data-act="add">Ajouter le mot</button></div><div id="add-msg" class="small muted" style="margin-top:8px"></div>' +
+    '</div>' +
+    (sample ? genPanel() : '') +
+    '<div class="panel"><h2 style="margin-top:0">Mes mots <span class="muted small">(' + state.words.length + ')</span></h2>' +
+      '<input type="search" id="f-search" placeholder="Rechercher un mot" value="' + esc(filter) + '" aria-label="Rechercher un mot">' +
+      (list.length ? '<ul class="words">' + list.map(w =>
+        '<li><div class="w"><b>' + esc(w.en) + '</b>' + (w.lvl ? '<span class="lvl">' + w.lvl + '</span>' : '') + '<span class="dots" title="Niveau ' + w.box + ' sur 6">' + [1,2,3,4,5,6].map(i => '<i class="' + (w.box >= i ? 'on' : '') + '"></i>').join('') + '</span><div>' + esc(w.fr) + '</div></div>' +
+        (canSpeak ? '<button class="icon-btn" data-act="say" data-text="' + esc(w.en) + '" aria-label="Écouter ' + esc(w.en) + '">🔊</button>' : '') +
+        '<button class="del" data-act="del" data-id="' + w.id + '" aria-label="Supprimer ' + esc(w.en) + '">×</button></li>').join('') + '</ul>'
+        : '<p class="muted" style="margin-top:12px">' + (filter ? 'Aucun mot ne correspond à « ' + esc(filter) + ' ».' : 'Ta liste est vide. Ajoute ton premier mot ci-dessus.') + '</p>') +
+    '</div>' +
+    '<div class="panel"><h2 style="margin-top:0">Réglages</h2>' +
+      '<label for="f-accent">Accent de la voix</label><select id="f-accent"><option value="en-GB">Britannique</option><option value="en-US">Américain</option></select>' +
+      '<label style="margin-top:18px">Transférer ma progression</label><p class="muted small">Pour passer de l’iPhone à l’iPad : exporte le fichier sur un appareil, envoie-le-toi (AirDrop, Fichiers, e-mail), puis importe-le sur l’autre.</p><div class="row"><button class="btn" data-act="export">Exporter</button><button class="btn" data-act="import">Importer</button></div><input type="file" id="f-import" accept="application/json,.json" hidden><div id="io-msg" class="small muted" style="margin-top:8px"></div>' +
+      '<div class="row" style="margin-top:16px"><button class="btn ghost" data-act="reset" style="color:var(--bad);border-color:var(--bad)">Réinitialiser ma progression</button></div>' +
+    '</div>';
+  $('f-accent').value = state.settings.accent;
+}
+// ---------- Test de niveau ----------
+// La première option de chaque question est la bonne réponse (mélangées à l’affichage).
+const PLACEMENT = [
+  { l: 'A1', q: 'She ___ a teacher.', o: ['is', 'are', 'am', 'be'] },
+  { l: 'A1', q: 'I ___ coffee every morning.', o: ['drink', 'drinks', 'drinking', 'am drink'] },
+  { l: 'A1', q: 'Le contraire de « big » :', o: ['small', 'tall', 'old', 'long'] },
+  { l: 'A2', q: 'I ___ to Spain last summer.', o: ['went', 'go', 'have gone', 'was go'] },
+  { l: 'A2', q: 'There aren’t ___ apples left.', o: ['any', 'some', 'a', 'no'] },
+  { l: 'A2', q: 'Au restaurant, pour payer : « Can we have the ___, please? »', o: ['bill', 'note', 'count', 'addition'] },
+  { l: 'B1', q: 'I’ve lived here ___ 2015.', o: ['since', 'for', 'from', 'during'] },
+  { l: 'B1', q: 'If it rains tomorrow, we ___ at home.', o: ['will stay', 'would stay', 'stayed', 'stay will'] },
+  { l: 'B1', q: '« Actually » veut dire :', o: ['en fait', 'actuellement', 'activement', 'exactement'] },
+  { l: 'B2', q: 'If I ___ about the meeting, I would have come.', o: ['had known', 'knew', 'have known', 'would know'] },
+  { l: 'B2', q: 'He turned ___ the job offer because the salary was too low.', o: ['down', 'off', 'out', 'over'] },
+  { l: 'B2', q: 'She’s used to ___ early.', o: ['getting up', 'get up', 'got up', 'have got up'] },
+  { l: 'C1', q: '___ had I arrived than the phone rang.', o: ['No sooner', 'Hardly', 'As soon', 'Barely'] },
+  { l: 'C1', q: '« To dwell on something » signifie :', o: ['ressasser quelque chose', 'habiter quelque part', 'décorer quelque chose', 'insister poliment'] },
+  { l: 'C1', q: 'The new policy has been criticised for ___ public trust.', o: ['undermining', 'underlining', 'underestimating', 'undergoing'] },
+  { l: 'C2', q: 'Quelle phrase est correcte ?', o: ['Little did he realise the trouble he was in.', 'Little he realised the trouble he was in.', 'Little did he realised the trouble he was in.', 'Little realised he the trouble he was in.'] },
+  { l: 'C2', q: '« A red herring » est :', o: ['une fausse piste', 'une personne timide', 'une mauvaise affaire', 'un secret de famille'] },
+  { l: 'C2', q: 'His ___ apology convinced no one; it was clearly just for show.', o: ['perfunctory', 'ubiquitous', 'quintessential', 'serendipitous'] }
+];
+let placement = null;
+function startPlacement(){
+  placement = { i: 0, qs: PLACEMENT.map(q => Object.assign({}, q, { opts: shuffle(q.o) })), score: {}, done: false, result: null };
+  render(current); window.scrollTo(0, 0);
+}
+function placementHTML(){
+  const p = placement;
+  if (p.done){
+    const r = p.result, L = LEVELS[r], cur = state.settings.level;
+    return '<div class="panel empty"><div class="q-prompt">Ton niveau estimé</div><div class="score">' + r + '</div><p><b>' + L.name + '</b><br><span class="muted small">' + L.fr + '</span></p>' +
+      '<p class="muted small">C’est une estimation rapide : ajuste ton niveau si les révisions te paraissent trop faciles ou trop difficiles.</p>' +
+      '<div class="row"><button class="btn primary" data-act="pl-apply">Choisir le niveau ' + r + '</button>' +
+      (cur ? '<button class="btn" data-act="pl-close">' + (cur === r ? 'Fermer' : 'Garder ' + cur) + '</button>' : '') + '</div>' +
+      '<div class="row" style="margin-top:10px"><button class="btn ghost" data-act="pl-start">Refaire le test</button></div></div>';
+  }
+  const q = p.qs[p.i];
+  const pct = Math.round(100 * p.i / p.qs.length);
+  return '<div class="progress" aria-hidden="true"><i style="width:' + pct + '%"></i></div>' +
+    '<div class="panel"><div class="q-prompt">Test de niveau</div><p style="font-size:1.25rem;font-weight:700;margin:4px 0 16px">' + esc(q.q) + '</p><div class="options">' +
+    q.opts.map(o => '<button class="opt" data-act="pl-answer" data-o="' + esc(o) + '">' + esc(o) + '</button>').join('') +
+    '<button class="opt" data-act="pl-answer" data-o="" style="color:var(--muted)">Je ne sais pas</button></div></div>' +
+    '<p class="muted small">Question ' + (p.i + 1) + ' sur ' + p.qs.length + ' au maximum. Le test s’arrête dès que les questions deviennent trop difficiles. <button class="linkish" data-act="pl-close">Quitter le test</button></p>';
+}
+function plAnswer(o){
+  const p = placement, q = p.qs[p.i];
+  p.score[q.l] = (p.score[q.l] || 0) + (o === q.o[0] ? 1 : 0);
+  p.i++;
+  const next = p.qs[p.i];
+  if (!next || next.l !== q.l){
+    if (p.score[q.l] < 2){ const k = LEVEL_KEYS.indexOf(q.l); p.done = true; p.result = k > 0 ? LEVEL_KEYS[k - 1] : 'A1'; }
+    else if (!next){ p.done = true; p.result = 'C2'; }
+  }
+  render(current); window.scrollTo(0, 0);
+}
+function levelPicker(){
+  return '<div class="panel"><h2 style="margin-top:0">Quel est ton niveau ?</h2><p class="muted small">Je prépare une première liste de mots adaptée. Tu pourras changer de niveau à tout moment dans « Mes mots ».</p><button class="btn primary" data-act="pl-start" style="width:100%;margin-bottom:14px">Faire le test de niveau (3 min)</button><p class="muted small">Ou choisis directement :</p><div class="levels">' +
+    LEVEL_KEYS.map(k => '<button class="level-opt" data-act="pick-level" data-l="' + k + '"><span class="code">' + k + '</span><span><b>' + LEVELS[k].name + '</b><small>' + LEVELS[k].fr + '</small></span></button>').join('') +
+    '</div><p class="muted small" style="margin-top:12px">Pas sûr ? Choisis A2 si tu te débrouilles dans des situations simples, B1 si tu peux tenir une petite conversation.</p></div>';
+}
+function levelPanel(){
+  const l = lvl();
+  const missing = PACKS[l].filter(w => !state.words.some(x => x.en.toLowerCase() === w[0].toLowerCase())).length;
+  return '<div class="panel"><h2 style="margin-top:0">Mon niveau</h2><div class="chips">' +
+    LEVEL_KEYS.map(k => '<button class="chip' + (k === state.settings.level ? ' on' : '') + '" data-act="pick-level" data-l="' + k + '" aria-pressed="' + (k === state.settings.level) + '">' + k + '</button>').join('') + '</div>' +
+    '<p style="margin-top:10px"><b>' + l + ' – ' + LEVELS[l].name + '</b><br><span class="muted small">' + LEVELS[l].fr + ' La conversation et les listes par thème s’adaptent à ce niveau.</span></p>' +
+    (missing ? '<button class="btn primary" data-act="add-pack">Ajouter les ' + missing + ' mots du niveau ' + l + '</button>' : '<p class="muted small">Les mots de base du niveau ' + l + ' sont dans ta liste.</p>') + '<div class="row" style="margin-top:10px"><button class="btn ghost" data-act="pl-start">Faire le test de niveau</button></div></div>';
+}
+function genPanel(){
+  let body = '';
+  if (gen && gen.loading) body = '<p class="muted" style="margin-top:12px">Claude prépare ta liste…</p>';
+  else if (gen && gen.error) body = '<p class="err">' + esc(gen.error) + '</p>';
+  else if (gen && gen.items) body = '<ul class="gen-list">' + gen.items.map((it, k) =>
+      '<li><input type="checkbox" id="g' + k + '" checked><label for="g' + k + '" style="margin:0;font-weight:400"><b class="hand" style="font-size:1.4rem;color:var(--ink)">' + esc(it.en) + '</b> — ' + esc(it.fr) + '<br><span class="muted small">' + esc(it.ex) + '</span></label></li>').join('') +
+    '</ul><div class="row"><button class="btn primary" data-act="gen-add">Ajouter la sélection</button><button class="btn" data-act="gen-clear">Annuler</button></div>';
+  return '<div class="panel"><h2 style="margin-top:0">Liste de mots par thème</h2><p class="muted small">Claude te propose 8 mots de niveau ' + lvl() + ' sur le thème de ton choix.</p>' +
+    '<label for="f-theme">Thème</label><input type="text" id="f-theme" placeholder="cuisine, voyage, réunion de travail…" value="' + esc(gen && gen.theme || '') + '">' +
+    '<div class="row" style="margin-top:14px"><button class="btn" data-act="gen"' + (gen && gen.loading ? ' disabled' : '') + '>Proposer 8 mots</button></div>' + body + '</div>';
+}
+async function generate(){
+  const theme = ($('f-theme').value || '').trim();
+  if (!theme){ gen = { theme, error: 'Écris un thème, par exemple « au restaurant ».' }; return renderWords(); }
+  gen = { theme, loading: true }; renderWords();
+  const known = state.words.map(w => w.en).join(', ');
+  try {
+    const out = await sample.json(
+      'You help a French speaker learn English. Learner level: ' + LEVELS[lvl()].en + ' Propose 8 useful English words or expressions about the theme: "' + theme + '", chosen to match exactly this CEFR level (not easier, not harder). ' +
+      'Avoid these, which the learner already knows: ' + known + '. ' +
+      'For each give: "en" (the English word; verbs start with "to", countable nouns with "a"/"an"), "fr" (short French translation), "ex" (a short, natural English example sentence). ' +
+      'Return only a JSON array of 8 objects with keys en, fr, ex.', { modelTier: 'quick' });
+    const items = (Array.isArray(out) ? out : (out && out.words) || []).filter(x => x && x.en && x.fr).slice(0, 8);
+    gen = items.length ? { theme, items } : { theme, error: 'Aucun mot reçu. Essaie un autre thème.' };
+  } catch(e){ gen = { theme, error: sampleError(e) }; }
+  if (current === 'mots') renderWords();
+}
+function sampleError(e){
+  const c = e && e.code;
+  if (c === 'not_granted') return 'Tu as refusé l’accès à Claude pour cette page. Recharge la page pour l’autoriser.';
+  if (c === 'rate_limited') return 'Trop de demandes d’un coup. Attends un instant puis réessaie.';
+  return 'La réponse de Claude n’est pas arrivée. Réessaie.';
+}
+
+// ---------- Conversation ----------
+const TOPICS = ['Se présenter','Au restaurant','En voyage','Au travail','Mes loisirs','Sujet libre'];
+const TOPIC_EN = {'Se présenter':'introducing yourself','Au restaurant':'ordering at a restaurant','En voyage':'travelling abroad','Au travail':'everyday life at work','Mes loisirs':'hobbies and free time','Sujet libre':'anything the learner wants'};
+let chat = { topic: null, msgs: [], loading: false, error: '' };
+function renderChat(){
+  const el = $('tab-parler');
+  if (!sampleChecked){ el.innerHTML = '<div class="panel empty"><p class="muted">Chargement…</p></div>'; return; }
+  if (!sample){
+    el.innerHTML = '<div class="panel empty"><div class="big">Conversation</div><p>La conversation avec l’IA et les listes de mots par thème ne sont pas disponibles dans la version hors ligne.</p><p>Pour discuter en anglais, ouvre la version Claude de l’app (connexion internet nécessaire).</p><a class="btn primary" style="display:inline-block;text-decoration:none;line-height:22px" href="https://claude.ai/artifact/87UKEBmq4RVgY3bX8mSSha" target="_blank" rel="noopener">Ouvrir la version Claude</a></div>';
+    return;
+  }
+  const lv = lvl();
+  let html = '<div class="panel"><h2 style="margin-top:0">Discuter en anglais</h2>' +
+    '<label for="f-level">Mon niveau</label><select id="f-level">' + LEVEL_KEYS.map(l => '<option value="' + l + '"' + (l === lv ? ' selected' : '') + '>' + l + ' – ' + LEVELS[l].name + '</option>').join('') + '</select>' +
+    '<label>Choisis un sujet pour commencer</label><div class="chips">' + TOPICS.map(t => '<button class="chip' + (chat.topic === t ? ' on' : '') + '" data-act="topic" data-t="' + esc(t) + '">' + esc(t) + '</button>').join('') + '</div></div>';
+  if (chat.topic){
+    html += '<div class="chat" id="chat">' + chat.msgs.map((m, k) => {
+      if (m.role === 'me') return '<div class="msg me">' + esc(m.text) + '</div>' + (m.better ? '<div class="fix"><b>Plus naturel : ' + esc(m.better) + '</b>' + esc(m.correction) + '</div>' : '');
+      return '<div class="msg tutor">' + esc(m.text) + '<div class="tools">' +
+        (canSpeak ? '<button class="linkish" data-act="say" data-text="' + esc(m.text) + '">🔊 Écouter</button>' : '') +
+        (m.translation ? '<button class="linkish" data-act="trans" data-k="' + k + '">' + (m.showTrans ? 'Masquer la traduction' : 'Voir la traduction') + '</button>' : '') +
+        '</div>' + (m.showTrans ? '<div class="trans">' + esc(m.translation) + '</div>' : '') + '</div>';
+    }).join('') + (chat.loading ? '<div class="msg tutor muted">…</div>' : '') + '</div>' +
+    (chat.error ? '<p class="err">' + esc(chat.error) + '</p>' : '') +
+    '<div class="composer"><textarea id="f-msg" rows="2" placeholder="Écris en anglais (ou en français si tu bloques)" aria-label="Ton message"></textarea>' +
+    '<button class="btn primary" data-act="send"' + (chat.loading ? ' disabled' : '') + '>Envoyer</button></div>' +
+    '<p class="muted small" style="margin-top:8px">Astuce : utilise la dictée du clavier de ton téléphone pour t’entraîner à l’oral.</p>';
+  }
+  el.innerHTML = html;
+  const c = $('chat'); if (c && chat.msgs.length) c.lastElementChild.scrollIntoView({ block: 'nearest' });
+}
+async function tutorTurn(){
+  chat.loading = true; chat.error = ''; renderChat();
+  const transcript = chat.msgs.slice(-14).map(m => (m.role === 'me' ? 'Learner: ' : 'Tutor: ') + m.text).join('\n');
+  const prompt =
+    'You are a warm, patient English tutor chatting with a French speaker. Learner level: ' + LEVELS[lvl()].en + ' Conversation topic: ' + TOPIC_EN[chat.topic] + '.\n' +
+    'Rules: write your reply in natural English adapted to the level (1 to 3 short sentences; simpler for beginners) and end with a question to keep the conversation going. ' +
+    'Check ONLY the learner\'s last message: if it has a grammar, vocabulary or naturalness mistake, set "better" to the corrected English sentence and "correction" to a one-sentence explanation in French; if it is correct, set both to "". ' +
+    'If the learner wrote in French, set "better" to how to say it in English and "correction" to a short French note. ' +
+    'Always set "translation" to a French translation of your reply.\n' +
+    (transcript ? 'Conversation so far:\n' + transcript + '\n' : 'The conversation has not started: greet the learner and open the topic with a question. Set "better" and "correction" to "".\n') +
+    'Return only JSON: {"reply": string, "translation": string, "better": string, "correction": string}';
+  try {
+    const out = await sample.json(prompt, { modelTier: 'quick', cache: false });
+    const last = chat.msgs[chat.msgs.length - 1];
+    if (last && last.role === 'me' && out && out.better && out.better.trim() && out.better.trim() !== last.text.trim()){ last.better = out.better; last.correction = out.correction || ''; }
+    chat.msgs.push({ role: 'tutor', text: (out && out.reply) || '…', translation: (out && out.translation) || '' });
+  } catch(e){ chat.error = sampleError(e); }
+  chat.loading = false;
+  if (current === 'parler') renderChat();
+}
+
+// ---------- Événements ----------
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-act]'); if (!t) return;
+  const act = t.dataset.act;
+  if (act === 'say'){ e.stopPropagation(); speak(t.dataset.text); return; }
+  if (act === 'goto') return show(t.dataset.to);
+  if (act === 'start'){ session = null; startSession(); return renderReview(); }
+  if (act === 'reveal'){ if (session && !session.revealed){ session.revealed = true; renderReview(); } return; }
+  if (act === 'grade') return grade(t.dataset.g);
+  if (act === 'quiz-start'){ newQuiz(); return renderQuiz(); }
+  if (act === 'answer') return answer(+t.dataset.k);
+  if (act === 'quiz-next'){ quiz.i++; quiz.answered = null; return renderQuiz(); }
+  if (act === 'add'){
+    const en = $('f-en').value.trim(), fr = $('f-fr').value.trim(), ex = $('f-ex').value.trim();
+    if (!en || !fr){ $('add-msg').textContent = 'Remplis le mot en anglais et sa traduction.'; return; }
+    if (state.words.some(w => w.en.toLowerCase() === en.toLowerCase())){ $('add-msg').textContent = '« ' + en + ' » est déjà dans ta liste.'; return; }
+    state.words.push(mkWord(en, fr, ex)); save(); renderWords();
+    $('add-msg').textContent = '« ' + en + ' » ajouté. Il apparaîtra dans ta prochaine révision.';
+    $('f-en').focus(); return;
+  }
+  if (act === 'del'){
+    const w = state.words.find(x => x.id === t.dataset.id);
+    if (w && confirm('Supprimer « ' + w.en + ' » ?')){ state.words = state.words.filter(x => x.id !== w.id); save(); renderWords(); }
+    return;
+  }
+  if (act === 'reset'){
+    if (confirm('Remettre à zéro ta progression et ta liste de mots ?')){
+      const keep = state.settings; state = freshState(); state.settings = keep; if (keep.level) addPack(keep.level); session = null; quiz = null; save(); renderAll();
+    }
+    return;
+  }
+  if (act === 'export'){
+    const blob = new Blob([JSON.stringify(state)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'mon-anglais-progression-' + new Date().toISOString().slice(0, 10) + '.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    $('io-msg').textContent = 'Fichier exporté. Retrouve-le dans l’app Fichiers, dossier Téléchargements.';
+    return;
+  }
+  if (act === 'import'){ $('f-import').click(); return; }
+  if (act === 'pl-start') return startPlacement();
+  if (act === 'pl-answer') return plAnswer(t.dataset.o);
+  if (act === 'pl-close'){ placement = null; return render(current); }
+  if (act === 'pl-apply'){
+    const r = placement.result, first = !state.settings.level;
+    state.settings.level = r; placement = null;
+    if (first){ addPack(r); session = null; }
+    save(); return render(current);
+  }
+  if (act === 'pick-level'){
+    const first = !state.settings.level;
+    state.settings.level = t.dataset.l;
+    if (first){ addPack(t.dataset.l); session = null; }
+    save(); return render(current);
+  }
+  if (act === 'add-pack'){
+    const n = addPack(lvl()); save(); renderWords();
+    $('add-msg').textContent = n + ' mot' + (n > 1 ? 's' : '') + ' du niveau ' + lvl() + ' ajouté' + (n > 1 ? 's' : '') + '. Ils apparaîtront dans ta prochaine révision.';
+    return;
+  }
+  if (act === 'gen') return generate();
+  if (act === 'gen-clear'){ gen = null; return renderWords(); }
+  if (act === 'gen-add'){
+    let n = 0;
+    gen.items.forEach((it, k) => {
+      const box = $('g' + k);
+      if (box && box.checked && !state.words.some(w => w.en.toLowerCase() === String(it.en).toLowerCase())){ state.words.push(mkWord(String(it.en), String(it.fr), String(it.ex || ''), lvl())); n++; }
+    });
+    gen = null; save(); renderWords();
+    $('add-msg').textContent = n + ' mot' + (n > 1 ? 's' : '') + ' ajouté' + (n > 1 ? 's' : '') + ' à ta liste.';
+    return;
+  }
+  if (act === 'topic'){ chat = { topic: t.dataset.t, msgs: [], loading: false, error: '' }; return tutorTurn(); }
+  if (act === 'trans'){ const m = chat.msgs[+t.dataset.k]; m.showTrans = !m.showTrans; return renderChat(); }
+  if (act === 'send'){
+    const box = $('f-msg'); const text = box.value.trim(); if (!text || chat.loading) return;
+    chat.msgs.push({ role: 'me', text }); return tutorTurn();
+  }
+});
+document.addEventListener('keydown', e => {
+  if (e.target.id === 'f-msg' && e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); const b = document.querySelector('[data-act="send"]'); if (b) b.click(); }
+  if (e.target.classList && e.target.classList.contains('card') && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); if (session && !session.revealed){ session.revealed = true; renderReview(); } }
+  if (['f-en','f-fr','f-ex'].includes(e.target.id) && e.key === 'Enter'){ e.preventDefault(); document.querySelector('[data-act="add"]').click(); }
+  if (e.target.id === 'f-theme' && e.key === 'Enter'){ e.preventDefault(); generate(); }
+});
+document.addEventListener('input', e => {
+  if (e.target.id === 'f-search'){ filter = e.target.value; const pos = e.target.selectionStart; renderWords(); const s = $('f-search'); s.focus(); s.setSelectionRange(pos, pos); }
+});
+document.addEventListener('change', e => {
+  if (e.target.id === 'f-import' && e.target.files[0]){
+    const r = new FileReader();
+    r.onload = () => {
+      let data = null;
+      try { data = migrate(JSON.parse(r.result)); } catch(err){ data = null; }
+      if (!data){ $('io-msg').textContent = 'Ce fichier n’est pas une sauvegarde de Mon anglais.'; return; }
+      if (!confirm('Remplacer la progression de cet appareil par celle du fichier (' + data.words.length + ' mots) ?')) return;
+      state = data; session = null; quiz = null; save(); renderAll();
+      const m = $('io-msg'); if (m) m.textContent = 'Progression importée.';
+    };
+    r.readAsText(e.target.files[0]);
+    e.target.value = '';
+  }
+  if (e.target.id === 'f-accent'){ state.settings.accent = e.target.value; save(); speak('Hello! This is how I sound.'); }
+  if (e.target.id === 'f-level'){ state.settings.level = e.target.value; save(); }
+});
+if (canSpeak) speechSynthesis.onvoiceschanged = () => {};
+
+// ---------- Démarrage ----------
+const start = location.hash.slice(1);
+show(TABS.includes(start) ? start : 'reviser');
+renderStats();
+sample = null; sampleChecked = true;
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+}
+})();
+</script>
+</body>
+</html>
