@@ -145,9 +145,26 @@ textarea{resize:vertical;min-height:52px}
 .level-opt{display:flex;gap:14px;align-items:center;text-align:left;border:1.5px solid var(--border);background:var(--surface);border-radius:14px;padding:12px 14px;min-height:60px}
 .level-opt .code{font-family:"Caveat",cursive;font-weight:700;font-size:2rem;line-height:1;color:var(--ink);min-width:44px}
 .level-opt small{display:block;color:var(--muted);font-size:.85rem}
+.lessons{display:grid;gap:10px;margin-bottom:16px}
+.lesson{display:flex;justify-content:space-between;align-items:center;gap:12px;text-align:left;border:1px solid var(--border);background:var(--surface);border-radius:14px;padding:14px 16px;min-height:64px}
+.lesson small{display:block;color:var(--muted);font-size:.85rem;font-weight:400}
+.gscore{font-size:.8rem;font-weight:700;color:var(--muted);white-space:nowrap}
+.gscore.full{color:var(--good)}
+.examples{background:var(--paper);border-left:3px solid var(--margin);border-radius:4px 10px 10px 4px;padding:8px 12px;margin-top:8px}
+.exl{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:4px 0}
+.exl .hand{font-size:1.5rem;line-height:1.15;color:var(--ink)}
+details.list{border-top:1px solid var(--border)}
+details.list summary{display:flex;align-items:center;gap:10px;padding:13px 0;cursor:pointer;font-weight:700;list-style:none}
+details.list summary::-webkit-details-marker{display:none}
+details.list summary span:first-child{flex:1}
+details.list summary::after{content:"▾";color:var(--muted)}
+details.list[open] summary::after{content:"▴"}
+.mini{list-style:none;padding:0;margin:0 0 12px}
+.mini li{padding:3px 0;font-size:.95rem}
+.mini .hand{font-size:1.35rem;color:var(--ink)}
 nav{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--border);padding-bottom:env(safe-area-inset-bottom,0px)}
-nav .inner{max-width:640px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
-nav button{border:0;background:none;padding:10px 4px 12px;font-size:.82rem;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:2px;min-height:60px}
+nav .inner{max-width:640px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
+nav button{border:0;background:none;padding:10px 2px 12px;font-size:.74rem;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:2px;min-height:60px}
 nav button .ic{font-size:1.3rem;line-height:1}
 nav button[aria-current="page"]{color:var(--ink);font-weight:700}
 .badge{display:inline-block;min-width:18px;padding:0 5px;border-radius:9px;background:var(--margin);color:#fff;font-size:.7rem;line-height:18px;margin-left:2px}
@@ -166,6 +183,7 @@ nav button[aria-current="page"]{color:var(--ink);font-weight:700}
 <main>
   <section id="tab-reviser"></section>
   <section id="tab-quiz" hidden></section>
+  <section id="tab-grammaire" hidden></section>
   <section id="tab-mots" hidden></section>
   <section id="tab-parler" hidden></section>
   <p class="sync" id="sync"></p>
@@ -175,6 +193,7 @@ nav button[aria-current="page"]{color:var(--ink);font-weight:700}
   <div class="inner">
     <button data-tab="reviser"><span class="ic">✎</span><span>Réviser <span id="due-badge"></span></span></button>
     <button data-tab="quiz"><span class="ic">?</span><span>Quiz</span></button>
+    <button data-tab="grammaire"><span class="ic">Aa</span><span>Grammaire</span></button>
     <button data-tab="mots"><span class="ic">≡</span><span>Mes mots</span></button>
     <button data-tab="parler"><span class="ic">💬</span><span>Parler</span></button>
   </div>
@@ -355,6 +374,85 @@ C2: [
 ["to take with a pinch of salt","prendre avec des pincettes","Take his advice with a pinch of salt."]
 ]
 };
+const THEMES = {
+A1: [
+ { n: "La maison", w: [["a kitchen","une cuisine","The kitchen is small."],["a bedroom","une chambre","My bedroom is blue."],["a bathroom","une salle de bain","The bathroom is upstairs."],["a table","une table","The keys are on the table."],["a chair","une chaise","Sit on this chair."],["a bed","un lit","I go to bed at ten."],["a window","une fenêtre","Open the window, please."],["a door","une porte","Close the door."],["a garden","un jardin","We have a small garden."],["the floor","le sol","The cat is on the floor."]] },
+ { n: "La nourriture", w: [["bread","du pain","I buy bread every morning."],["cheese","du fromage","French cheese is famous."],["an apple","une pomme","I eat an apple a day."],["water","de l’eau","Can I have some water?"],["meat","de la viande","I don’t eat meat."],["fish","du poisson","We eat fish on Fridays."],["an egg","un œuf","I want two eggs."],["rice","du riz","Rice with vegetables, please."],["milk","du lait","Do you want milk in your tea?"],["breakfast","le petit-déjeuner","Breakfast is at eight."]] },
+ { n: "Les jours et l’heure", w: [["Monday","lundi","See you on Monday."],["the weekend","le week-end","What do you do at the weekend?"],["the morning","le matin","I run in the morning."],["the evening","le soir","I read in the evening."],["the night","la nuit","Good night!"],["an hour","une heure","The film is two hours long."],["a minute","une minute","Wait a minute!"],["early","tôt","I get up early."],["late","tard, en retard","Sorry, I’m late."],["now","maintenant","I’m busy now."]] },
+ { n: "Vêtements et couleurs", w: [["a shirt","une chemise","He wears a white shirt."],["trousers","un pantalon","These trousers are too long."],["shoes","des chaussures","I need new shoes."],["a dress","une robe","What a beautiful dress!"],["a coat","un manteau","Take your coat, it’s cold."],["a hat","un chapeau","He has a funny hat."],["red","rouge","I like your red bag."],["green","vert","The grass is green."],["black","noir","She wears black shoes."],["yellow","jaune","The sun is yellow."]] }
+],
+A2: [
+ { n: "Les transports", w: [["a train station","une gare","The train station is near here."],["a platform","un quai","The train leaves from platform 4."],["to get on","monter (dans un véhicule)","Get on the bus here."],["to get off","descendre (d’un véhicule)","Get off at the next stop."],["a delay","un retard","There’s a ten-minute delay."],["a return ticket","un aller-retour","A return ticket to Oxford, please."],["a single ticket","un aller simple","Just a single ticket, please."],["traffic","la circulation","The traffic is terrible today."],["to miss","rater","I missed my train."],["a flight","un vol","Our flight was cancelled."]] },
+ { n: "La santé", w: [["a headache","un mal de tête","I’ve got a headache."],["a cold","un rhume","She has a bad cold."],["a fever","de la fièvre","He has a high fever."],["to hurt","faire mal","My back hurts."],["a chemist’s","une pharmacie","Is there a chemist’s near here?"],["medicine","un médicament","Take this medicine twice a day."],["an appointment","un rendez-vous","I have a doctor’s appointment."],["ill","malade","I feel ill today."],["to rest","se reposer","You should rest."],["a cough","une toux","I have a terrible cough."]] },
+ { n: "Les courses", w: [["a shop assistant","un vendeur, une vendeuse","The shop assistant was very helpful."],["a size","une taille","What size are you?"],["to try on","essayer (un vêtement)","Can I try on this jacket?"],["a fitting room","une cabine d’essayage","The fitting rooms are over there."],["a discount","une réduction","Is there a student discount?"],["the sales","les soldes","I bought it in the sales."],["cash","des espèces","Can I pay in cash?"],["a card","une carte bancaire","Do you take cards?"],["change","la monnaie","Here’s your change."],["a bag","un sac","Do you need a bag?"]] },
+ { n: "Les émotions", w: [["happy","heureux","I’m so happy for you!"],["sad","triste","Why are you sad?"],["angry","en colère","She was angry with me."],["worried","inquiet","I’m worried about the exam."],["scared","effrayé","He’s scared of dogs."],["surprised","surpris","We were surprised to see him."],["proud","fier","I’m proud of you."],["bored","qui s’ennuie","I’m bored, let’s go out."],["excited","enthousiaste, impatient","The kids are excited about Christmas."],["nervous","stressé, nerveux","I always feel nervous before an interview."]] }
+],
+B1: [
+ { n: "Le travail", w: [["a meeting","une réunion","The meeting starts at nine."],["a deadline","une date limite","The deadline is Friday."],["a salary","un salaire","She earns a good salary."],["to hire","embaucher","They hired three new people."],["to be in charge of","être responsable de","I’m in charge of the budget."],["a day off","un jour de congé","I’m taking a day off tomorrow."],["a manager","un responsable, un chef","My manager is on holiday."],["to apply for","postuler à","I applied for a new job."],["overtime","des heures supplémentaires","I worked overtime last week."],["a task","une tâche","I have a lot of tasks today."]] },
+ { n: "Le voyage", w: [["luggage","les bagages","I lost my luggage."],["to check in","s’enregistrer","We checked in at the hotel."],["abroad","à l’étranger","I’ve never lived abroad."],["a passport","un passeport","Don’t forget your passport."],["accommodation","l’hébergement","Accommodation is expensive here."],["to go sightseeing","faire du tourisme","Let’s go sightseeing tomorrow."],["a souvenir","un souvenir (objet)","I bought a souvenir for my mum."],["jet lag","le décalage horaire","I’m still suffering from jet lag."],["a guidebook","un guide (livre)","The guidebook recommends this café."],["a sightseeing tour","une visite guidée","We went on a sightseeing tour."]] },
+ { n: "Le logement", w: [["a flat","un appartement","We rent a flat downtown."],["a landlord","un propriétaire (bailleur)","The landlord fixed the heating."],["rent","le loyer","The rent is too high."],["to move house","déménager","We’re moving house next month."],["the heating","le chauffage","Turn the heating on."],["a lease","un bail","We signed a one-year lease."],["furnished","meublé","Is the flat furnished?"],["a neighbourhood","un quartier","It’s a quiet neighbourhood."],["bills","les factures","Bills are included."],["a lift","un ascenseur","The lift is out of order."]] },
+ { n: "Médias et internet", w: [["the news","les informations","I watch the news every evening."],["a headline","un gros titre","Did you see the headlines?"],["to download","télécharger","Download the app."],["a password","un mot de passe","I forgot my password."],["to upload","mettre en ligne","She uploaded a video."],["a website","un site web","Check their website."],["to subscribe","s’abonner","Subscribe to the newsletter."],["an advert","une publicité","I hate adverts on TV."],["a podcast","un podcast","I listen to podcasts on the train."],["a screen","un écran","My phone screen is broken."]] }
+],
+B2: [
+ { n: "Le monde professionnel", w: [["to negotiate","négocier","We negotiated a better price."],["a workload","une charge de travail","My workload is huge this month."],["to meet a deadline","respecter un délai","We met the deadline."],["a promotion","une promotion","She got a promotion."],["to resign","démissionner","He resigned last week."],["to delegate","déléguer","Learn to delegate tasks."],["feedback","un retour, des commentaires","Thanks for your feedback."],["a stakeholder","une partie prenante","We need to inform all stakeholders."],["to brainstorm","faire un remue-méninges","Let’s brainstorm some ideas."],["a shift","un poste (horaire de travail)","I work the night shift."]] },
+ { n: "L’environnement", w: [["climate change","le changement climatique","Climate change is a global issue."],["renewable energy","les énergies renouvelables","Renewable energy is growing fast."],["to recycle","recycler","We recycle glass and paper."],["pollution","la pollution","Air pollution is a problem in big cities."],["waste","les déchets","We produce too much waste."],["a drought","une sécheresse","The drought destroyed the crops."],["to reduce","réduire","We must reduce our emissions."],["sustainable","durable","We need sustainable solutions."],["endangered","menacé d’extinction","Pandas are an endangered species."],["a footprint","une empreinte","Reduce your carbon footprint."]] },
+ { n: "Exprimer son opinion", w: [["in my view","à mon avis","In my view, it’s a mistake."],["to agree with","être d’accord avec","I totally agree with you."],["on the other hand","d’un autre côté","On the other hand, it’s expensive."],["to argue","soutenir (une idée), se disputer","He argues that taxes are too high."],["to be against","être contre","I’m against the idea."],["to make a point","soulever un point","You make a good point."],["an issue","un problème, une question","It’s a complex issue."],["to convince","convaincre","You’ve convinced me."],["to some extent","dans une certaine mesure","I agree to some extent."],["to back up","étayer, soutenir","Can you back that up with facts?"]] },
+ { n: "Les relations", w: [["to fall out with","se brouiller avec","I fell out with my sister."],["to make up","se réconcilier","They argued but made up quickly."],["to look up to","admirer","I’ve always looked up to my father."],["to let someone down","décevoir quelqu’un","Don’t let me down."],["trustworthy","digne de confiance","She’s completely trustworthy."],["to put up with","supporter, tolérer","I can’t put up with his rudeness."],["to break up","rompre","They broke up last year."],["supportive","qui soutient, encourageant","My friends are very supportive."],["to have a lot in common","avoir beaucoup en commun","We have a lot in common."],["a close friend","un ami proche","She’s a close friend of mine."]] }
+],
+C1: [
+ { n: "Affaires et économie", w: [["a downturn","un ralentissement","The economy is in a downturn."],["to thrive","prospérer","Small businesses are thriving."],["a merger","une fusion","The merger created a giant."],["revenue","le chiffre d’affaires","Revenue rose by 10%."],["to outsource","externaliser","They outsourced customer service."],["a bottleneck","un goulot d’étranglement","Delivery is the main bottleneck."],["to leverage","tirer parti de","We should leverage our network."],["cutting-edge","de pointe","They use cutting-edge technology."],["a shortfall","un déficit, un manque","There’s a budget shortfall."],["to scale up","passer à grande échelle","We plan to scale up production."]] },
+ { n: "Politique et société", w: [["a policy","une politique (mesure)","The new policy is unpopular."],["to enforce","faire appliquer","The law is rarely enforced."],["a loophole","une faille (juridique)","They exploited a tax loophole."],["inequality","l’inégalité","Inequality is rising."],["to advocate","prôner, défendre","She advocates free education."],["a landslide","une victoire écrasante","He won by a landslide."],["grassroots","de terrain, citoyen","It’s a grassroots movement."],["accountability","l’obligation de rendre des comptes","We need more accountability."],["to curb","freiner, limiter","The aim is to curb inflation."],["a backlash","un retour de bâton","The decision caused a backlash."]] },
+ { n: "Nuances de sens", w: [["nuanced","nuancé","She gave a nuanced answer."],["to discern","discerner","It’s hard to discern the truth."],["subtle","subtil","There’s a subtle difference."],["ambiguous","ambigu","The ending is ambiguous."],["to imply","sous-entendre","What are you implying?"],["to infer","déduire","I inferred that she was upset."],["arguably","sans doute, on peut dire que","It’s arguably his best book."],["to downplay","minimiser","He downplayed the risks."],["to overstate","exagérer","Its importance can’t be overstated."],["tentative","provisoire, hésitant","We reached a tentative agreement."]] },
+ { n: "Expressions idiomatiques", w: [["to be on the same page","être sur la même longueur d’onde","Let’s make sure we’re on the same page."],["to hit the nail on the head","mettre le doigt dessus","You’ve hit the nail on the head."],["the elephant in the room","le sujet que tout le monde évite","Nobody mentioned the elephant in the room."],["to call it a day","s’arrêter là pour aujourd’hui","Let’s call it a day."],["to go the extra mile","faire un effort supplémentaire","She always goes the extra mile."],["to cost an arm and a leg","coûter les yeux de la tête","That car cost an arm and a leg."],["to be in hot water","être dans le pétrin","He’s in hot water with his boss."],["to break the ice","briser la glace","A joke helps to break the ice."],["once in a blue moon","tous les trente-six du mois","I see him once in a blue moon."],["to miss the boat","rater le coche","Hurry up or you’ll miss the boat."]] }
+],
+C2: [
+ { n: "Registre soutenu", w: [["to ascertain","établir, s’assurer de","We must ascertain the facts."],["to commence","commencer (soutenu)","The ceremony will commence at noon."],["hitherto","jusqu’ici","A hitherto unknown species was found."],["to endeavour","s’efforcer","We endeavour to reply within 24 hours."],["henceforth","désormais","Henceforth, all staff must wear badges."],["to deem","juger, estimer","The plan was deemed too risky."],["albeit","quoique, bien que","It worked, albeit slowly."],["to warrant","justifier","The situation warrants caution."],["inasmuch as","dans la mesure où","It’s useful inasmuch as it saves time."],["to elucidate","élucider, éclaircir","Could you elucidate this point?"]] },
+ { n: "Vocabulaire littéraire", w: [["ephemeral","éphémère","Fame is ephemeral."],["to linger","s’attarder, persister","The smell lingered for hours."],["a reverie","une rêverie","She was lost in a reverie."],["poignant","poignant","It was a poignant moment."],["to languish","languir, dépérir","The project languished for years."],["wistful","mélancolique, nostalgique","He gave a wistful smile."],["to meander","serpenter, divaguer","The river meanders through the valley."],["luminous","lumineux","Her eyes were luminous."],["a vestige","un vestige","These are the last vestiges of the empire."],["elusive","insaisissable","Happiness can be elusive."]] },
+ { n: "Argumentation fine", w: [["to concede","concéder","I concede that you have a point."],["a caveat","une réserve, une mise en garde","One caveat: the data is old."],["to refute","réfuter","She refuted every argument."],["tenuous","ténu, fragile","The link is tenuous at best."],["to substantiate","étayer, prouver","Can you substantiate that claim?"],["a fallacy","un raisonnement fallacieux","That’s a common fallacy."],["cogent","convaincant, solide","He made a cogent case."],["to belie","démentir, masquer","Her smile belied her anxiety."],["spurious","fallacieux, faux","That’s a spurious argument."],["to posit","postuler, avancer","Some scientists posit a link between the two."]] },
+ { n: "Idiomes avancés", w: [["to steal someone’s thunder","voler la vedette à quelqu’un","She stole my thunder at the meeting."],["a storm in a teacup","une tempête dans un verre d’eau","It’s just a storm in a teacup."],["to throw down the gauntlet","lancer un défi","The rival firm threw down the gauntlet."],["to be left holding the baby","se retrouver avec le problème sur les bras","Everyone left and I was left holding the baby."],["to cut to the chase","aller droit au but","Let’s cut to the chase."],["to be up in arms","être en émoi, protester vivement","Residents are up in arms about the plan."],["the lion’s share","la part du lion","He took the lion’s share of the profits."],["to have a field day","s’en donner à cœur joie","The press had a field day."],["to rest on one’s laurels","se reposer sur ses lauriers","Don’t rest on your laurels."],["a Pyrrhic victory","une victoire à la Pyrrhus","It was a Pyrrhic victory."]] }
+]
+};
+
+// x : [phrase, bonne réponse, mauvaise, mauvaise, mauvaise]
+const GRAMMAR = {
+A1: [
+ { id: "a1-be", t: "Le verbe « to be »", s: "am, is, are", r: ["« To be » signifie être. Au présent : I am, you are, he / she / it is, we / they are.", "À l’oral, on contracte presque toujours : I’m, you’re, she’s, they’re.", "Négation : ajoute not (I’m not, he isn’t). Question : place le verbe avant le sujet (Are you tired?)."], e: ["I’m a student.", "She isn’t at home.", "Are they French?"], x: [["My parents ___ teachers.","are","is","am","be"],["I ___ not hungry.","am","is","are","be"],["___ your brother at school?","Is","Are","Am","Be"],["It ___ cold today.","is","are","am","be"],["We ___ from Lyon.","are","is","am","be"]] },
+ { id: "a1-present", t: "Le présent simple", s: "habitudes et vérités générales", r: ["Il exprime une habitude ou une vérité générale : I work, you work, they work.", "Attention : avec he, she, it, on ajoute -s au verbe : she works, he watches.", "Négation et question avec do / does : I don’t like tea. Does he play tennis?"], e: ["I get up at seven.", "She lives in Paris.", "Do you speak English?"], x: [["She ___ in a bank.","works","work","working","is work"],["They ___ like coffee.","don’t","doesn’t","not","isn’t"],["___ he play football?","Does","Do","Is","Are"],["My cat ___ a lot.","sleeps","sleep","sleeping","is sleep"],["I ___ TV every evening.","watch","watches","watching","am watch"]] },
+ { id: "a1-articles", t: "Les articles a, an, the", s: "un, une, le, la, les", r: ["A / an = un, une. On utilise an devant un son voyelle : an apple, an hour.", "The = le, la, les : pour une chose précise ou déjà connue.", "Pas d’article pour une généralité au pluriel ou une matière : I like dogs (j’aime les chiens), I love music."], e: ["I have a car and an umbrella.", "The car is red.", "Cats are cute."], x: [["I eat ___ apple every day.","an","a","the","(rien)"],["She’s ___ doctor.","a","an","the","(rien)"],["Close ___ door, please.","the","a","an","(rien)"],["I love ___ music.","(rien)","the","a","an"],["He waited for ___ hour.","an","a","the","(rien)"]] },
+ { id: "a1-possessives", t: "Les possessifs", s: "my, your, his, her, ’s", r: ["Adjectifs possessifs : my (mon), your (ton, votre), his (son, à lui), her (son, à elle), its, our, their.", "His ou her dépend du possesseur, pas de l’objet : Marie and her brother (Marie et son frère).", "Pour dire « de » quelqu’un, on ajoute ’s : Tom’s car (la voiture de Tom)."], e: ["This is my phone.", "Marie loves her dog.", "Paul’s sister is nice."], x: [["Marie is with ___ husband.","her","his","their","its"],["Tom and Ann love ___ house.","their","her","his","our"],["Paul calls ___ mother every day.","his","her","its","their"],["This is ___ car. (la voiture de Sarah)","Sarah’s","Sarahs","Sarah","of Sarah"],["We like ___ new flat.","our","us","we","ours"]] }
+],
+A2: [
+ { id: "a2-past", t: "Le prétérit (past simple)", s: "actions terminées dans le passé", r: ["Il sert à parler d’une action terminée, souvent avec un repère : yesterday, last week, in 2019.", "Verbes réguliers : + -ed (worked, played). Beaucoup sont irréguliers : go → went, see → saw, buy → bought.", "Négation et question avec did + verbe à l’infinitif : I didn’t go. Did you see it?"], e: ["I visited London last year.", "We went to the cinema.", "Did you call her?"], x: [["Yesterday I ___ to the market.","went","go","goed","have gone"],["She ___ the film last night.","saw","seed","sees","has seen"],["We didn’t ___ the bus.","catch","caught","catched","catches"],["___ you enjoy the party?","Did","Do","Were","Have"],["They ___ a new car in May.","bought","buyed","buy","have bought"]] },
+ { id: "a2-continuous", t: "Le présent continu", s: "be + -ing", r: ["Il décrit une action en cours au moment où l’on parle : I’m reading.", "Il sert aussi pour un projet déjà organisé : I’m meeting Tom tomorrow.", "Comparé au présent simple (habitude) : I usually walk, but today I’m taking the bus."], e: ["She’s cooking dinner.", "What are you doing?", "We’re leaving on Friday."], x: [["Listen! The baby ___.","is crying","cries","cry","crying"],["I ___ to work every day.","walk","am walking","walking","walks"],["What ___ you doing now?","are","do","is","does"],["They ___ to Rome next week.","are flying","flies","fly to","flying"],["He usually ___ tea, but today he’s drinking coffee.","drinks","is drinking","drink","drinking"]] },
+ { id: "a2-comparatives", t: "Comparatifs et superlatifs", s: "bigger, the biggest, more…", r: ["Adjectif court : + -er / the + -est → cheap, cheaper, the cheapest.", "Adjectif long : more / the most → more expensive, the most expensive.", "Irréguliers : good → better → the best ; bad → worse → the worst. « Que » se dit than."], e: ["Paris is bigger than Lyon.", "This is the most beautiful beach.", "My cold is worse today."], x: [["My brother is ___ than me.","taller","more tall","tallest","the taller"],["It’s the ___ film of the year.","best","better","goodest","most good"],["This hotel is ___ than the other one.","more expensive","expensiver","most expensive","the expensive"],["She’s older ___ her sister.","than","that","as","then"],["Today is the ___ day of the year.","hottest","hotter","most hot","hotest"]] },
+ { id: "a2-future", t: "Le futur : will et going to", s: "projets, décisions, prédictions", r: ["Be going to : une intention ou un projet déjà décidé → I’m going to learn Spanish.", "Will : une décision prise sur le moment, une promesse ou une prédiction → I’ll help you. It will rain.", "Après will, le verbe reste à l’infinitif sans to : she will come."], e: ["I’m going to visit my aunt this weekend.", "The phone’s ringing. I’ll answer it.", "I think it will be sunny."], x: [["Look at those clouds! It ___ rain.","is going to","will to","goes to","going"],["Don’t worry, I ___ call you tonight.","’ll","am going","going to","will to"],["We’ve decided: we ___ move to Spain.","are going to","will to","go to","going"],["She will ___ tomorrow.","arrive","arrives","to arrive","arriving"],["« I’m cold. » « I ___ close the window. »","’ll","am going","going","will to"]] }
+],
+B1: [
+ { id: "b1-present-perfect", t: "Present perfect ou prétérit ?", s: "have + participe passé", r: ["Present perfect (have + participe passé) : expérience, résultat présent ou action sans date précise → I’ve been to Japan.", "Avec for (une durée) et since (un point de départ) : I’ve lived here for ten years / since 2015.", "Dès qu’il y a un moment terminé (yesterday, in 2019, last week), on passe au prétérit : I went to Japan in 2019."], e: ["Have you ever eaten sushi?", "She’s just finished her work.", "I lost my keys yesterday."], x: [["I ___ here since 2018.","have lived","live","lived","am living"],["She ___ to Italy last summer.","went","has gone","has been","goes"],["Have you ever ___ a horse?","ridden","rode","ride","riding"],["We’ve known each other ___ ten years.","for","since","during","from"],["I can’t find my phone. I think I ___ it.","have lost","lose","had lost","am losing"]] },
+ { id: "b1-conditionals", t: "Les conditionnels 1 et 2", s: "if + présent / if + prétérit", r: ["Situation réelle ou probable : if + présent, will + verbe → If it rains, I’ll stay home.", "Situation imaginaire : if + prétérit, would + verbe → If I had more money, I would travel.", "Jamais de will ni de would juste après if. Avec to be, on dit souvent If I were…"], e: ["If you study, you’ll pass.", "If I were you, I’d accept.", "What would you do if you won the lottery?"], x: [["If it ___ tomorrow, we’ll cancel the picnic.","rains","will rain","rained","would rain"],["If I ___ rich, I’d buy a boat.","were","am","will be","would be"],["If you heat ice, it ___.","melts","would melt","melted","will melted"],["She ___ happier if she lived by the sea.","would be","will be","is","has been"],["If I see him, I ___ tell him.","will","would","am","did"]] },
+ { id: "b1-modals", t: "Les modaux d’obligation et de conseil", s: "must, have to, should, can", r: ["Must : obligation ressentie par celui qui parle. Have to : obligation extérieure (règle, loi).", "Piège classique : mustn’t = interdiction, don’t have to = pas obligé.", "Should : un conseil (tu devrais). Can / could : capacité ou permission."], e: ["You must see this film!", "I have to wear a uniform at work.", "You shouldn’t eat so late."], x: [["You ___ smoke here. It’s forbidden.","mustn’t","don’t have to","shouldn’t to","can"],["It’s Sunday, so I ___ get up early.","don’t have to","mustn’t","can’t to","shouldn’t to"],["You look tired. You ___ go to bed.","should","must to","have","can to"],["___ I open the window?","Can","Must to","Should to","Have"],["In France, you ___ drive on the right.","have to","don’t have to","mustn’t","should to"]] },
+ { id: "b1-past-continuous", t: "Le prétérit continu", s: "was / were + -ing", r: ["Il décrit une action en cours à un moment du passé : At midnight, I was sleeping.", "Avec le prétérit, il pose le décor, et le prétérit marque l’action qui interrompt : I was cooking when the phone rang.", "While s’emploie souvent avec la forme continue : While she was driving, she saw a fox."], e: ["What were you doing at eight?", "It was raining when we left.", "I was reading when he arrived."], x: [["I ___ a shower when you called.","was having","had have","have","am having"],["While we ___ TV, the lights went out.","were watching","are watching","watch","was watch"],["She ___ her leg while she was skiing.","broke","was breaking","breaks","has broken"],["At 10 p.m. yesterday, they ___ dinner.","were having","have","are having","has had"],["He was walking home when he ___ an old friend.","met","was meet","meets","meet"]] }
+],
+B2: [
+ { id: "b2-third-conditional", t: "Le 3e conditionnel et les regrets", s: "would have, wish, should have", r: ["Pour imaginer un passé différent : if + past perfect, would have + participe → If I had left earlier, I would have caught the train.", "Pour un regret : I wish + past perfect → I wish I had studied more.", "Should have / could have + participe : reproche ou occasion manquée → You should have told me."], e: ["If she had asked, I would have helped.", "I wish I hadn’t said that.", "We could have won."], x: [["If I ___ the answer, I would have told you.","had known","knew","have known","would know"],["She would have passed if she ___ harder.","had studied","studied","has studied","would study"],["I wish I ___ that money.","hadn’t spent","haven’t spent","wouldn’t spend","don’t spend"],["You should ___ me earlier!","have called","called","call","had called"],["If they had taken a taxi, they ___ late.","wouldn’t have been","weren’t","won’t be","hadn’t been"]] },
+ { id: "b2-passive", t: "La voix passive", s: "be + participe passé", r: ["Forme : be (au temps voulu) + participe passé → The house was built in 1900.", "On l’emploie quand l’auteur est inconnu ou peu important ; on peut le préciser avec by.", "Tournures utiles : It is said that…, He is believed to be…, I had my car repaired (j’ai fait réparer ma voiture)."], e: ["English is spoken here.", "The thief has been arrested.", "I’m having my hair cut tomorrow."], x: [["This bridge ___ in 1890.","was built","built","is building","has build"],["The results ___ next week.","will be announced","will announce","are announcing","announced"],["The thief ___ yet.","hasn’t been caught","didn’t catch","hasn’t caught","isn’t catching"],["I had my phone ___ yesterday.","repaired","repair","to repair","repairing"],["It ___ that he’s very rich.","is said","says","is saying","said"]] },
+ { id: "b2-reported", t: "Le discours indirect", s: "he said that…, she asked if…", r: ["On recule généralement d’un temps : « I am tired » → She said she was tired.", "Will devient would, can devient could, le present perfect devient past perfect.", "Questions : pas d’inversion, et if quand il n’y a pas de mot interrogatif → He asked if I was ready / where I lived."], e: ["He said he would come.", "She told me she had finished.", "They asked where the station was."], x: [["« I’m busy. » → He said he ___ busy.","was","is being","has","will"],["« I will help. » → She said she ___ help.","would","will to","can to","had"],["He asked me where I ___.","lived","did I live","do I live","live I"],["She asked ___ I liked jazz.","if","that","what","do"],["« I’ve lost my keys. » → He said he ___ his keys.","had lost","has lose","loses","was lose"]] },
+ { id: "b2-gerund", t: "Gérondif ou infinitif ?", s: "enjoy doing / decide to do", r: ["Après certains verbes on met -ing : enjoy, avoid, mind, finish, suggest → I enjoy reading.", "Après d’autres, to + verbe : want, decide, hope, agree, refuse → She decided to leave.", "Le sens change avec stop, remember, try : I stopped smoking (j’ai arrêté de fumer) / I stopped to smoke (je me suis arrêté pour fumer). Après une préposition, toujours -ing : interested in learning."], e: ["Do you mind waiting?", "We agreed to meet at six.", "Remember to lock the door."], x: [["I really enjoy ___ in the sea.","swimming","to swim","swim","swam"],["They refused ___ the contract.","to sign","signing","sign","signed"],["She’s interested in ___ Japanese.","learning","to learn","learn","learned"],["Remember ___ the lights before you leave.","to turn off","turn off","turned off","turns off"],["Would you mind ___ the window?","opening","to open","open","opened"]] }
+],
+C1: [
+ { id: "c1-inversion", t: "L’inversion pour insister", s: "Never have I…, Not only did…", r: ["Après une expression négative ou restrictive en début de phrase, on inverse l’auxiliaire et le sujet : Never have I seen such a mess.", "Expressions courantes : never, rarely, seldom, not only… but also, no sooner… than, hardly… when, under no circumstances, little.", "C’est un style soutenu, fréquent à l’écrit et dans les discours."], e: ["Not only did he lie, but he also stole.", "Rarely do we see such talent.", "Under no circumstances should you open it."], x: [["Never ___ such a beautiful sunset.","have I seen","I have seen","I saw","seen I have"],["Not only ___ late, but she also forgot the tickets.","was she","she was","she is","is she being"],["Hardly had we sat down ___ the fire alarm went off.","when","than","that","then"],["Under no circumstances ___ the door.","should you open","you should open","open you","you open"],["Little ___ that he was being watched.","did he know","he knew","knew he","he did know"]] },
+ { id: "c1-mixed", t: "Les conditionnels mixtes", s: "passé et présent mélangés", r: ["Passé imaginaire, conséquence présente : if + past perfect, would + verbe → If I had taken that job, I would be rich now.", "Présent imaginaire, conséquence passée : if + prétérit, would have + participe → If I spoke Spanish, I would have understood him.", "En style soutenu, on remplace if par une inversion : Had I known, I would have come. Were I you, I would wait."], e: ["If she hadn’t missed the flight, she would be here now.", "Had I known, I would have called.", "Were I in your position, I’d accept."], x: [["If I had studied medicine, I ___ a doctor now.","would be","would have be","will be","am"],["If he weren’t so shy, he ___ to her at the party.","would have spoken","would speak","spoke","had spoken"],["___ I known about the strike, I’d have taken the car.","Had","If","Have","Would"],["___ I you, I wouldn’t sign it.","Were","Was","Am","Had"],["If we hadn’t got lost, we ___ at the hotel by now.","would be","would have be","will be","had been"]] },
+ { id: "c1-cleft", t: "La mise en relief", s: "It was… who, What I need is…", r: ["It is / was… that / who… met un élément en valeur : It was Tom who called (c’est Tom qui a appelé).", "What… is / was… insiste sur une idée : What I need is a holiday (ce dont j’ai besoin, c’est de vacances).", "All… is… : All I want is some peace (tout ce que je veux, c’est un peu de calme)."], e: ["It’s the noise that bothers me.", "What surprised me was his reaction.", "All you have to do is ask."], x: [["___ I really need is a good night’s sleep.","What","That","Which","It"],["It was in Paris ___ they first met.","that","what","which","where it"],["All I want ___ to be left alone.","is","are","it is","that"],["It ___ my sister who told me.","was","is being","were","has"],["What annoys me ___ his attitude.","is","it is","are","that is"]] },
+ { id: "c1-wish", t: "Wish, if only, it’s time, would rather", s: "regrets et souhaits", r: ["I wish / If only + prétérit : regret sur le présent → I wish I lived by the sea.", "I wish + would : agacement face au comportement de quelqu’un → I wish you would stop talking.", "It’s (high) time + prétérit : il est grand temps → It’s time we left. Would rather + sujet + prétérit → I’d rather you didn’t smoke."], e: ["If only I had more time!", "I wish it would stop raining.", "It’s high time you found a job."], x: [["I wish I ___ taller.","were","am","will be","would be"],["It’s high time we ___ home.","went","go","will go","have gone"],["I’d rather you ___ tell anyone.","didn’t","don’t","won’t","not"],["I wish my neighbours ___ so much noise.","wouldn’t make","don’t make","won’t make","haven’t made"],["If only I ___ her advice last year!","had followed","followed","have followed","would follow"]] }
+],
+C2: [
+ { id: "c2-subjunctive", t: "Le subjonctif anglais", s: "I suggest that he leave", r: ["Après suggest, insist, recommend, demand, ou it is essential / vital that, on emploie la base verbale sans -s : I suggest that he leave now.", "Négation sans do : that he not be late. Passif : that it be done.", "Expressions figées : Be that as it may, Come what may, If need be, God save the King."], e: ["The doctor insisted that she rest.", "It’s vital that everyone be informed.", "Come what may, we’ll finish."], x: [["The board demanded that he ___ immediately.","resign","resigns","resigned","will resign"],["It is essential that the report ___ on time.","be submitted","is submitted","will be submitted","submits"],["I recommend that she ___ the offer.","not accept","doesn’t accept","not accepts","won’t accept"],["___ that as it may, we must decide.","Be","Being","Is","Was"],["They insisted that the meeting ___ postponed.","be","is","was being","will be"]] },
+ { id: "c2-ellipsis", t: "Ellipse et substitution", s: "So do I, I hope not, do so", r: ["Pour éviter de répéter : so / neither + auxiliaire + sujet → « I love jazz. » « So do I. » « I can’t swim. » « Neither can I. »", "Substitution : I think so, I hope not, I’m afraid so ; do so reprend une action → He promised to call, and he did so.", "Ellipse après to : I didn’t want to go, but I had to."], e: ["« She’s tired. » « So am I. »", "He asked me to leave, and I did so.", "« Will it rain? » « I hope not. »"], x: [["« I haven’t finished. » « ___. »","Neither have I","So have I","Neither I have","Nor I haven’t"],["« Is he coming? » « I’m afraid ___. »","so","it","yes","that"],["She was asked to resign, and she ___.","did so","made so","did it so","so did"],["I didn’t want to go, but I had ___.","to","to it","so","it"],["« Marc speaks Russian. » « ___ his wife. »","So does","So is","Neither does","So speaks"]] },
+ { id: "c2-participles", t: "Les propositions participiales", s: "Having finished…, Built in…", r: ["Une participiale condense une phrase : Having finished the report, she went home (après avoir fini le rapport…).", "Participe présent pour un sens actif ou simultané, participe passé pour un sens passif : Built in 1890, the bridge is still in use.", "Le sujet sous-entendu doit être celui de la principale, sinon la phrase devient ambiguë (dangling participle)."], e: ["Not knowing what to say, he left.", "Exhausted, she fell asleep at once.", "Having lived abroad, I understand them."], x: [["___ the letter, she burst into tears.","Having read","Had read","Have read","To have reading"],["___ in 1889, the tower attracts millions.","Completed","Completing","Having completing","Complete"],["___ what to do, he called his lawyer.","Not knowing","Knowing not","Not knew","Didn’t knowing"],["___ by the noise, the baby started crying.","Woken","Waking","Having woke","Woke"],["___ all day, they were exhausted.","Having walked","Walked by","Have walked","Had walking"]] },
+ { id: "c2-deduction", t: "Les modaux de déduction au passé", s: "must have, can’t have, needn’t have", r: ["Must have + participe : déduction quasi certaine → She must have left (elle a dû partir).", "Can’t / couldn’t have : impossibilité → He can’t have seen us.", "May / might / could have : possibilité → They might have got lost. Needn’t have : action faite mais inutile → You needn’t have brought anything."], e: ["The streets are wet; it must have rained.", "She can’t have forgotten; I reminded her.", "You needn’t have waited for me."], x: [["The lights are off. They ___ gone to bed.","must have","can’t have","needn’t have","should"],["He ___ stolen it; he was with me all evening.","can’t have","must have","might have","needn’t have"],["I’m not sure where she is. She ___ missed the train.","might have","must","can’t have","needn’t"],["You ___ cooked; we’d already eaten.","needn’t have","mustn’t have","can’t have","wouldn’t"],["The door was locked. Someone ___ locked it from inside.","must have","can’t have","needn’t have","may"]] }
+]
+};
+
 const LEVEL_KEYS = ["A1","A2","B1","B2","C1","C2"];
 const LEVELS = {
   A1: { name: "Découverte", fr: "Mots et phrases très simples du quotidien.", en: "CEFR A1, complete beginner. Use very short, simple sentences in the present tense and only very common words. Correct only the most important mistake, gently." },
@@ -369,13 +467,14 @@ const LS_KEY = 'mon-anglais-v1';
 const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
 const mkWord = (en, fr, ex, lvl) => ({ id: uid(), en, fr, ex: ex || '', box: 0, due: 0, seen: 0, lvl: lvl || '' });
 const freshState = () => ({
-  v: 2, updatedAt: Date.now(), words: [], packs: [],
+  v: 2, updatedAt: Date.now(), words: [], packs: [], grammar: {},
   stats: { streak: 0, lastDay: null, todayDay: null, todayCount: 0 },
   settings: { accent: 'en-GB', level: null }
 });
 function migrate(s){
   if (!s || !s.words) return null;
   if (!s.packs) s.packs = [];
+  if (!s.grammar) s.grammar = {};
   if (!s.settings) s.settings = { accent: 'en-GB', level: null };
   const map = { 'Débutant': 'A2', 'Intermédiaire': 'B1', 'Avancé': 'B2' };
   if (map[s.settings.level]) s.settings.level = map[s.settings.level];
@@ -392,6 +491,12 @@ function addPack(l){
   let n = 0;
   PACKS[l].forEach(w => { if (!have.has(w[0].toLowerCase())){ state.words.push(mkWord(w[0], w[1], w[2], l)); n++; } });
   if (!state.packs.includes(l)) state.packs.push(l);
+  return n;
+}
+function addWords(list, l){
+  const have = new Set(state.words.map(w => w.en.toLowerCase()));
+  let n = 0;
+  list.forEach(w => { const k = w[0].toLowerCase(); if (!have.has(k)){ state.words.push(mkWord(w[0], w[1], w[2], l)); have.add(k); n++; } });
   return n;
 }
 function lvl(){ return state.settings.level || 'B1'; }
@@ -475,7 +580,7 @@ function renderStats(){
 }
 
 // ---------- Onglets ----------
-const TABS = ['reviser','quiz','mots','parler'];
+const TABS = ['reviser','quiz','grammaire','mots','parler'];
 let current = 'reviser';
 function show(tab){
   if (!TABS.includes(tab)) tab = 'reviser';
@@ -485,7 +590,7 @@ function show(tab){
   render(tab);
   window.scrollTo(0, 0);
 }
-function render(tab){ ({ reviser: renderReview, quiz: renderQuiz, mots: renderWords, parler: renderChat })[tab](); }
+function render(tab){ ({ reviser: renderReview, quiz: renderQuiz, grammaire: renderGrammar, mots: renderWords, parler: renderChat })[tab](); }
 function renderAll(){ renderStats(); render(current); }
 document.querySelector('nav').addEventListener('click', e => { const b = e.target.closest('button[data-tab]'); if (b) show(b.dataset.tab); });
 window.addEventListener('hashchange', () => { const t = location.hash.slice(1); if (TABS.includes(t) && t !== current) show(t); });
@@ -614,7 +719,7 @@ function renderWords(){
   if (placement){ el.innerHTML = placementHTML(); return; }
   const list = state.words.filter(w => !filter || (w.en + ' ' + w.fr).toLowerCase().includes(filter.toLowerCase()))
     .sort((a,b) => a.en.replace(/^(to |a |an )/,'').localeCompare(b.en.replace(/^(to |a |an )/,'')));
-  el.innerHTML = levelPanel() +
+  el.innerHTML = levelPanel() + listsPanel() +
     '<div class="panel"><h2 style="margin-top:0">Ajouter un mot</h2>' +
       '<label for="f-en">En anglais</label><input type="text" id="f-en" autocomplete="off" autocapitalize="none" placeholder="to look forward to">' +
       '<label for="f-fr">En français</label><input type="text" id="f-fr" autocomplete="off" placeholder="avoir hâte de">' +
@@ -706,6 +811,21 @@ function levelPanel(){
     '<p style="margin-top:10px"><b>' + l + ' – ' + LEVELS[l].name + '</b><br><span class="muted small">' + LEVELS[l].fr + ' La conversation et les listes par thème s’adaptent à ce niveau.</span></p>' +
     (missing ? '<button class="btn primary" data-act="add-pack">Ajouter les ' + missing + ' mots du niveau ' + l + '</button>' : '<p class="muted small">Les mots de base du niveau ' + l + ' sont dans ta liste.</p>') + '<div class="row" style="margin-top:10px"><button class="btn ghost" data-act="pl-start">Faire le test de niveau</button></div></div>';
 }
+let listLevel = null;
+function allLists(l){ return [{ n: 'Essentiels ' + l, w: PACKS[l] }].concat(THEMES[l]); }
+function listsPanel(){
+  const l = listLevel || lvl();
+  const have = new Set(state.words.map(w => w.en.toLowerCase()));
+  return '<div class="panel"><h2 style="margin-top:0">Listes de vocabulaire</h2><p class="muted small">Ouvre une liste pour voir ses mots, puis ajoute-la à tes révisions.</p><div class="chips">' +
+    LEVEL_KEYS.map(k => '<button class="chip' + (k === l ? ' on' : '') + '" data-act="list-level" data-l="' + k + '" aria-pressed="' + (k === l) + '">' + k + '</button>').join('') + '</div>' +
+    '<div id="list-msg" class="small" style="color:var(--good);margin:6px 0"></div>' +
+    allLists(l).map((li, i) => {
+      const missing = li.w.filter(w => !have.has(w[0].toLowerCase())).length;
+      return '<details class="list"><summary><span>' + esc(li.n) + '</span><span class="muted small">' + (missing ? li.w.length + ' mots' : '✓ ajoutée') + '</span></summary><ul class="mini">' +
+        li.w.map(w => '<li><b class="hand">' + esc(w[0]) + '</b> — ' + esc(w[1]) + '</li>').join('') + '</ul>' +
+        (missing ? '<button class="btn primary" style="margin-bottom:12px" data-act="add-list" data-l="' + l + '" data-i="' + i + '">' + (missing === li.w.length ? 'Ajouter les ' + missing + ' mots' : 'Ajouter les ' + missing + ' mots manquants') + '</button>' : '') + '</details>';
+    }).join('') + '</div>';
+}
 function genPanel(){
   let body = '';
   if (gen && gen.loading) body = '<p class="muted" style="margin-top:12px">Claude prépare ta liste…</p>';
@@ -740,6 +860,78 @@ function sampleError(e){
   return 'La réponse de Claude n’est pas arrivée. Réessaie.';
 }
 
+// ---------- Grammaire ----------
+let gram = { level: null, id: null, ex: null, loading: false, error: '' };
+function findLesson(id){ for (const k of LEVEL_KEYS){ const L = GRAMMAR[k].find(x => x.id === id); if (L) return { k, L }; } return null; }
+function startGrammarEx(items){
+  gram.ex = { qs: items.map(x => ({ q: x[0], a: x[1], opts: shuffle(x.slice(1)) })), i: 0, score: 0, answered: null, ai: false };
+  renderGrammar(); window.scrollTo(0, 0);
+}
+function renderGrammar(){
+  const el = $('tab-grammaire');
+  const lv = gram.level || lvl();
+  const f = gram.id ? findLesson(gram.id) : null;
+  if (!f){
+    const done = GRAMMAR[lv].filter(L => state.grammar[L.id] != null).length;
+    el.innerHTML = '<div class="panel"><h2 style="margin-top:0">Grammaire</h2><p class="muted small">Une règle expliquée en français, des exemples à écouter, puis 5 exercices.</p><div class="chips">' +
+      LEVEL_KEYS.map(k => '<button class="chip' + (k === lv ? ' on' : '') + '" data-act="g-level" data-l="' + k + '" aria-pressed="' + (k === lv) + '">' + k + '</button>').join('') + '</div>' +
+      '<p class="muted small" style="margin:10px 0 0">' + LEVELS[lv].name + ' : ' + done + ' leçon' + (done > 1 ? 's' : '') + ' sur ' + GRAMMAR[lv].length + ' travaillée' + (done > 1 ? 's' : '') + '.</p></div>' +
+      '<div class="lessons">' + GRAMMAR[lv].map(L => {
+        const b = state.grammar[L.id];
+        return '<button class="lesson" data-act="g-open" data-id="' + L.id + '"><span><b>' + esc(L.t) + '</b><small>' + esc(L.s) + '</small></span><span class="gscore' + (b === L.x.length ? ' full' : '') + '">' + (b == null ? 'À faire' : (b === L.x.length ? '✓ ' : '') + b + '/' + L.x.length) + '</span></button>';
+      }).join('') + '</div>';
+    return;
+  }
+  const L = f.L;
+  if (gram.ex){
+    const ex = gram.ex, n = ex.qs.length;
+    if (ex.i >= n){
+      el.innerHTML = '<div class="panel empty"><div class="q-prompt">' + esc(L.t) + '</div><div class="score">' + ex.score + '/' + n + '</div><p>' +
+        (ex.score === n ? 'Parfait, tu maîtrises cette règle !' : ex.score >= n - 1 ? 'Très bien, presque parfait.' : 'Relis la règle et réessaie, ça viendra vite.') + '</p>' +
+        '<div class="row"><button class="btn primary" data-act="g-start">Recommencer</button><button class="btn" data-act="g-lesson">Revoir la règle</button></div>' +
+        '<div class="row" style="margin-top:10px"><button class="btn ghost" data-act="g-back">Toutes les leçons</button></div></div>';
+      return;
+    }
+    const q = ex.qs[ex.i];
+    el.innerHTML = '<div class="progress" aria-hidden="true"><i style="width:' + Math.round(100 * ex.i / n) + '%"></i></div>' +
+      '<div class="panel"><div class="q-prompt">' + esc(L.t) + (ex.ai ? ' · exercices de Claude' : '') + '</div>' +
+      '<p style="font-size:1.25rem;font-weight:700;margin:4px 0 16px">' + esc(q.q) + '</p><div class="options">' +
+      q.opts.map((o, k) => {
+        let cls = 'opt';
+        if (ex.answered !== null){ if (o === q.a) cls += ' right'; else if (k === ex.answered) cls += ' wrong'; }
+        return '<button class="' + cls + '" data-act="g-answer" data-k="' + k + '"' + (ex.answered !== null ? ' disabled' : '') + '>' + esc(o) + '</button>';
+      }).join('') + '</div>' +
+      (ex.answered !== null ? '<p style="margin:14px 0 0">' + (q.opts[ex.answered] === q.a ? '<b style="color:var(--good)">Bonne réponse !</b>' : '<b style="color:var(--bad)">La bonne réponse :</b> ' + esc(q.a)) + '</p>' +
+        '<div class="row" style="margin-top:14px">' + (canSpeak ? '<button class="btn ghost" data-act="say" data-text="' + esc(q.q.replace('___', q.a)) + '">🔊 Écouter</button>' : '') +
+        '<button class="btn primary" data-act="g-next">' + (ex.i === n - 1 ? 'Voir mon score' : 'Question suivante') + '</button></div>' : '') +
+      '</div><p class="muted small">Question ' + (ex.i + 1) + ' sur ' + n + ' <button class="linkish" data-act="g-lesson" style="margin-left:8px">Revoir la règle</button></p>';
+    return;
+  }
+  el.innerHTML = '<button class="linkish" data-act="g-back">← Toutes les leçons</button>' +
+    '<div class="panel" style="margin-top:8px"><div class="q-prompt">' + f.k + ' · Grammaire</div><h2 style="margin-top:2px">' + esc(L.t) + '</h2>' +
+    L.r.map(p => '<p>' + esc(p) + '</p>').join('') +
+    '<div class="examples">' + L.e.map(x => '<div class="exl"><span class="hand">' + esc(x) + '</span>' + (canSpeak ? '<button class="icon-btn" data-act="say" data-text="' + esc(x) + '" aria-label="Écouter">🔊</button>' : '') + '</div>').join('') + '</div>' +
+    '<div class="row" style="margin-top:16px"><button class="btn primary" data-act="g-start">S’entraîner (' + L.x.length + ' questions)</button></div>' +
+    (sample ? '<div class="row" style="margin-top:10px"><button class="btn" data-act="g-more"' + (gram.loading ? ' disabled' : '') + '>' + (gram.loading ? 'Claude prépare tes exercices…' : '5 nouveaux exercices avec Claude') + '</button></div>' : '') +
+    (gram.error ? '<p class="err">' + esc(gram.error) + '</p>' : '') + '</div>';
+}
+async function genGrammar(f){
+  gram.loading = true; gram.error = ''; renderGrammar();
+  try {
+    const out = await sample.json(
+      'Create 5 new multiple-choice grammar exercises for a French speaker learning English at CEFR level ' + f.k + '. Grammar point: ' + f.L.t + ' (' + f.L.s + '). Rule summary in French: ' + f.L.r.join(' ') +
+      ' Each exercise is one English sentence with a single gap written ___ and exactly 4 options: the first option is the only correct answer, the three others are clearly wrong. Vary the vocabulary and situations, and do not reuse these sentences: ' + f.L.x.map(x => x[0]).join(' | ') +
+      '. Return only a JSON array of 5 objects: {"q": string, "o": [correct, wrong, wrong, wrong]}.', { modelTier: 'quick', cache: false });
+    const items = (Array.isArray(out) ? out : (out && out.exercises) || [])
+      .filter(x => x && x.q && Array.isArray(x.o) && x.o.length === 4 && new Set(x.o.map(String)).size === 4)
+      .map(x => [String(x.q)].concat(x.o.map(String))).slice(0, 5);
+    gram.loading = false;
+    if (gram.id !== f.L.id) return;
+    if (!items.length){ gram.error = 'Aucun exercice reçu. Réessaie.'; return renderGrammar(); }
+    startGrammarEx(items); gram.ex.ai = true; renderGrammar();
+  } catch(e){ gram.loading = false; gram.error = sampleError(e); renderGrammar(); }
+}
+
 // ---------- Conversation ----------
 const TOPICS = ['Se présenter','Au restaurant','En voyage','Au travail','Mes loisirs','Sujet libre'];
 const TOPIC_EN = {'Se présenter':'introducing yourself','Au restaurant':'ordering at a restaurant','En voyage':'travelling abroad','Au travail':'everyday life at work','Mes loisirs':'hobbies and free time','Sujet libre':'anything the learner wants'};
@@ -748,7 +940,7 @@ function renderChat(){
   const el = $('tab-parler');
   if (!sampleChecked){ el.innerHTML = '<div class="panel empty"><p class="muted">Chargement…</p></div>'; return; }
   if (!sample){
-    el.innerHTML = '<div class="panel empty"><div class="big">Conversation</div><p>La conversation avec l’IA et les listes de mots par thème ne sont pas disponibles dans la version hors ligne.</p><p>Pour discuter en anglais, ouvre la version Claude de l’app (connexion internet nécessaire).</p><a class="btn primary" style="display:inline-block;text-decoration:none;line-height:22px" href="https://claude.ai/artifact/87UKEBmq4RVgY3bX8mSSha" target="_blank" rel="noopener">Ouvrir la version Claude</a></div>';
+    el.innerHTML = '<div class="panel empty"><div class="big">Conversation</div><p>La conversation avec l’IA, les listes par thème générées par Claude et les exercices de grammaire supplémentaires ne sont pas disponibles dans la version hors ligne.</p><p>Pour discuter en anglais, ouvre la version Claude de l’app (connexion internet nécessaire).</p><a class="btn primary" style="display:inline-block;text-decoration:none;line-height:22px" href="https://claude.ai/artifact/87UKEBmq4RVgY3bX8mSSha" target="_blank" rel="noopener">Ouvrir la version Claude</a></div>';
     return;
   }
   const lv = lvl();
@@ -822,6 +1014,34 @@ document.addEventListener('click', e => {
       const keep = state.settings; state = freshState(); state.settings = keep; if (keep.level) addPack(keep.level); session = null; quiz = null; save(); renderAll();
     }
     return;
+  }
+  if (act === 'list-level'){ listLevel = t.dataset.l; return renderWords(); }
+  if (act === 'add-list'){
+    const l = t.dataset.l, li = allLists(l)[+t.dataset.i];
+    const n = addWords(li.w, l);
+    if (+t.dataset.i === 0 && !state.packs.includes(l)) state.packs.push(l);
+    save(); renderWords();
+    const m = $('list-msg'); if (m) m.textContent = '✓ ' + n + ' mot' + (n > 1 ? 's' : '') + ' de « ' + li.n + ' » ajouté' + (n > 1 ? 's' : '') + ' à tes révisions.';
+    return;
+  }
+  if (act === 'g-level'){ gram.level = t.dataset.l; return renderGrammar(); }
+  if (act === 'g-open'){ gram.id = t.dataset.id; gram.ex = null; gram.error = ''; renderGrammar(); window.scrollTo(0, 0); return; }
+  if (act === 'g-back'){ gram.id = null; gram.ex = null; gram.error = ''; renderGrammar(); window.scrollTo(0, 0); return; }
+  if (act === 'g-lesson'){ gram.ex = null; renderGrammar(); window.scrollTo(0, 0); return; }
+  if (act === 'g-start'){ const f = findLesson(gram.id); if (f) startGrammarEx(f.L.x); return; }
+  if (act === 'g-more'){ const f = findLesson(gram.id); if (f && sample && !gram.loading) genGrammar(f); return; }
+  if (act === 'g-answer'){
+    const ex = gram.ex; if (!ex || ex.answered !== null) return;
+    ex.answered = +t.dataset.k; if (ex.qs[ex.i].opts[ex.answered] === ex.qs[ex.i].a) ex.score++;
+    return renderGrammar();
+  }
+  if (act === 'g-next'){
+    const ex = gram.ex; ex.i++; ex.answered = null;
+    if (ex.i >= ex.qs.length){
+      if (!ex.ai) state.grammar[gram.id] = Math.max(state.grammar[gram.id] || 0, ex.score);
+      markActivity(); save();
+    }
+    renderGrammar(); window.scrollTo(0, 0); return;
   }
   if (act === 'export'){
     const blob = new Blob([JSON.stringify(state)], { type: 'application/json' });

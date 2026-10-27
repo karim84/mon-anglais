@@ -1,6 +1,6 @@
 // Mon anglais : service worker pour l'utilisation hors ligne.
 // Change le numéro de version après chaque mise à jour des fichiers.
-const CACHE = 'mon-anglais-v1';
+const CACHE = 'mon-anglais-v2';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', event => {
