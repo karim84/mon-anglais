@@ -162,6 +162,8 @@ details.list[open] summary::after{content:"▴"}
 .mini{list-style:none;padding:0;margin:0 0 12px}
 .mini li{padding:3px 0;font-size:.95rem}
 .mini .hand{font-size:1.35rem;color:var(--ink)}
+.doc{background:var(--paper);border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-size:.95rem;line-height:1.55;overflow-wrap:anywhere}
+.doc mark{background:var(--ink-soft);color:var(--ink);font-weight:700;padding:0 3px;border-radius:4px}
 nav{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--border);padding-bottom:env(safe-area-inset-bottom,0px)}
 nav .inner{max-width:640px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
 nav button{border:0;background:none;padding:10px 2px 12px;font-size:.74rem;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:2px;min-height:60px}
@@ -467,7 +469,7 @@ const LS_KEY = 'mon-anglais-v1';
 const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
 const mkWord = (en, fr, ex, lvl) => ({ id: uid(), en, fr, ex: ex || '', box: 0, due: 0, seen: 0, lvl: lvl || '' });
 const freshState = () => ({
-  v: 2, updatedAt: Date.now(), words: [], packs: [], grammar: {},
+  v: 2, updatedAt: Date.now(), words: [], packs: [], grammar: {}, toeic: [],
   stats: { streak: 0, lastDay: null, todayDay: null, todayCount: 0 },
   settings: { accent: 'en-GB', level: null }
 });
@@ -475,6 +477,7 @@ function migrate(s){
   if (!s || !s.words) return null;
   if (!s.packs) s.packs = [];
   if (!s.grammar) s.grammar = {};
+  if (!s.toeic) s.toeic = [];
   if (!s.settings) s.settings = { accent: 'en-GB', level: null };
   const map = { 'Débutant': 'A2', 'Intermédiaire': 'B1', 'Avancé': 'B2' };
   if (map[s.settings.level]) s.settings.level = map[s.settings.level];
@@ -680,15 +683,12 @@ function newQuiz(){
 }
 function renderQuiz(){
   const el = $('tab-quiz');
-  if (state.words.length < 4){ el.innerHTML = '<div class="panel empty"><div class="big">Pas assez de mots</div><p>Il faut au moins 4 mots pour lancer un quiz.</p><button class="btn primary" data-act="goto" data-to="mots">Ajouter des mots</button></div>'; return; }
-  if (!quiz){
-    el.innerHTML = '<div class="panel empty"><div class="big">Quiz express</div><p>10 questions, dans les deux sens. Les mots ratés reviennent dans ta prochaine révision.</p><button class="btn primary" data-act="quiz-start">Commencer le quiz</button></div>';
-    return;
-  }
+  if (toe) return renderToeic(el);
+  if (!quiz || state.words.length < 4){ quiz = null; el.innerHTML = quizMenu(); return; }
   if (quiz.i >= quiz.qs.length){
     el.innerHTML = '<div class="panel empty"><div class="score">' + quiz.score + '/' + quiz.qs.length + '</div><p>' +
       (quiz.score === quiz.qs.length ? 'Sans faute !' : quiz.missed.length + ' mot' + (quiz.missed.length > 1 ? 's' : '') + ' à revoir, ajouté' + (quiz.missed.length > 1 ? 's' : '') + ' à ta révision.') +
-      '</p><div class="row"><button class="btn primary" data-act="quiz-start">Recommencer</button>' + (quiz.missed.length ? '<button class="btn" data-act="goto" data-to="reviser">Réviser maintenant</button>' : '') + '</div></div>';
+      '</p><div class="row"><button class="btn primary" data-act="quiz-start">Recommencer</button>' + (quiz.missed.length ? '<button class="btn" data-act="goto" data-to="reviser">Réviser maintenant</button>' : '') + '</div><div class="row" style="margin-top:10px"><button class="btn ghost" data-act="quiz-menu">Menu des quiz</button></div></div>';
     return;
   }
   const q = quiz.qs[quiz.i];
@@ -702,7 +702,7 @@ function renderQuiz(){
       return '<button class="' + cls + '" data-act="answer" data-k="' + k + '"' + (quiz.answered !== null ? ' disabled' : '') + '>' + esc(o) + '</button>';
     }).join('') + '</div>' +
     (quiz.answered !== null ? '<div class="row" style="margin-top:14px">' + (canSpeak ? '<button class="btn ghost" data-act="say" data-text="' + esc(q.dir === 'en-fr' ? q.prompt : q.answer) + '">🔊 Écouter</button>' : '') + '<button class="btn primary" data-act="quiz-next">' + (quiz.i === quiz.qs.length - 1 ? 'Voir mon score' : 'Question suivante') + '</button></div>' : '') +
-    '</div><p class="muted small">Question ' + (quiz.i + 1) + ' sur ' + quiz.qs.length + '</p>';
+    '</div><p class="muted small">Question ' + (quiz.i + 1) + ' sur ' + quiz.qs.length + ' <button class="linkish" data-act="quiz-menu" style="margin-left:8px">Quitter</button></p>';
 }
 function answer(k){
   const q = quiz.qs[quiz.i];
@@ -710,6 +710,226 @@ function answer(k){
   if (q.options[k] === q.answer) quiz.score++;
   else { quiz.missed.push(q.id); const w = state.words.find(x => x.id === q.id); if (w){ w.due = Date.now(); w.box = Math.min(w.box, 1); save(); } }
   renderQuiz();
+}
+
+// ---------- Entraînement type TOEIC (questions originales, format inspiré de l’examen) ----------
+const TOE = {
+p2: [
+ ["Where is the staff meeting being held?","In the main conference room.","At ten thirty.","Yes, it was very helpful."],
+ ["When does the new manager start?","Next Monday, I believe.","In the marketing department.","She manages it well."],
+ ["Would you like me to print the report?","Yes, two copies, please.","The printer is new.","I reported it yesterday."],
+ ["Who’s in charge of the budget this year?","Ms. Patel from finance.","It’s very tight.","About five thousand dollars."],
+ ["Why was the flight delayed?","Because of the bad weather.","At gate twelve.","No, I didn’t fly."],
+ ["How often do you visit the Tokyo office?","About twice a year.","It’s near the station.","For three days."],
+ ["Haven’t you sent the invoice yet?","I’ll do it this afternoon.","Yes, the voice was clear.","The sales were good."],
+ ["Should we order lunch or go out?","Let’s try the café downstairs.","Yes, we should.","It was delicious."],
+ ["Can you show me how to use the new software?","Sure, I have a few minutes now.","It’s a new soft drink.","The show starts at eight."],
+ ["The client called while you were out.","Did she leave a message?","Yes, I’m out of paper.","I’ll take the bus."],
+ ["Which hotel did you book for the conference?","The one next to the convention center.","I read that book last week.","Three nights."],
+ ["How much will the repairs cost?","The mechanic is still checking.","About two hours.","Yes, they’re repaired."]
+],
+p5: [
+ ["The marketing team will ___ the results at Friday’s meeting.","present","presentation","presenting","presented","Après will, on met la base verbale."],
+ ["Please submit your expense reports ___ the end of the month.","by","until","since","during","By = au plus tard à une échéance."],
+ ["Ms. Chen has worked for the company ___ fifteen years.","for","since","during","ago","For + une durée avec le present perfect."],
+ ["The new printer is much ___ than the old one.","faster","fast","fastest","more fast","Comparatif d’un adjectif court : -er + than."],
+ ["All visitors must sign in ___ entering the building.","before","during","among","despite","Before + -ing ; during est suivi d’un nom."],
+ ["The manager asked ___ assistant to book a flight to Chicago.","her","she","hers","herself","Devant un nom, on utilise un adjectif possessif."],
+ ["Our sales increased ___ after the advertising campaign.","significantly","significant","significance","signify","Un adverbe modifie le verbe increased."],
+ ["Mr. Lopez is responsible ___ training new staff.","for","of","to","with","Responsible for + nom ou -ing."],
+ ["___ the heavy rain, the outdoor event was not cancelled.","Despite","Although","Because","However","Despite + nom ; although est suivi d’une proposition."],
+ ["The shipment is expected to arrive ___ two business days.","within","among","between","along","Within = dans un délai de."],
+ ["Applicants should have at least three years of ___ in customer service.","experience","experienced","experiencing","experiment","Après of, il faut un nom."],
+ ["If you have any questions, please do not hesitate to ___ me.","contact","contacting","contacted","contacts","Hesitate to + base verbale."],
+ ["The quarterly report ___ by the finance team last week.","was prepared","prepared","has prepared","is preparing","Passif (by the finance team) au prétérit (last week)."],
+ ["Neither the director ___ the assistant was available.","nor","or","and","but","Neither… nor."],
+ ["The company offers a ___ benefits package to all full-time employees.","competitive","competition","compete","competitively","Devant un nom, il faut un adjectif."],
+ ["Please make sure the documents are signed ___ they are sent.","before","during","despite","unless","Before introduit une proposition de temps ici."],
+ ["The CEO, ___ joined the company in 2015, will retire next year.","who","which","whom","whose","Who reprend une personne sujet du verbe."],
+ ["We regret to inform you that the position has ___ been filled.","already","yet","still","ever","Already dans une phrase affirmative au present perfect."],
+ ["The hotel is ___ located near the airport and the city center.","conveniently","convenient","convenience","convene","Un adverbe modifie le participe located."],
+ ["The workshop was so ___ that many participants asked for a second session.","successful","success","succeed","successfully","Après was so, il faut un adjectif."],
+ ["Ms. Novak will be out of the office ___ Thursday.","until","by","since","within","Until = jusqu’à, pour une situation qui dure."],
+ ["The board approved the proposal ___ some members had concerns.","even though","despite","in spite","because of","Even though est suivi d’une proposition (sujet + verbe)."],
+ ["Employees are encouraged ___ their ideas at the monthly meeting.","to share","sharing","share","shared","Be encouraged to + base verbale."],
+ ["The maintenance team will inspect ___ elevator in the building.","every","all","each of","many","Every + nom au singulier."]
+],
+p6: [
+ { title: "E-mail : déménagement du service", text: "Dear team,\nAs you know, our department [1] to the third floor next week. Movers will arrive on Monday morning, so please pack your personal items [2] Friday afternoon. Boxes are available in the supply room. [3], IT staff will reconnect all computers over the weekend. If you need help, please contact Daniel in facilities. Thank you for your [4].\nBest regards,\nLaura Kim, Office Manager",
+   blanks: [["is moving","moved","has moved","was moving"],["by","until","since","during"],["In addition","However","Instead","Otherwise"],["cooperation","cooperate","cooperative","cooperatively"]] },
+ { title: "Annonce : bibliothèque municipale", text: "Greenfield Public Library is pleased to announce its new evening opening hours. [1] March 1, the library will stay open until 9 p.m. on weekdays. This change was made in response to [2] from many working residents. Members can also reserve study rooms online, [3] makes it easier to plan group work. For more information, [4] our website or ask at the front desk.",
+   blanks: [["Starting","Started","Start","Starter"],["requests","requested","requesting","requester"],["which","what","who","it"],["visit","visiting","visited","to visiting"]] },
+ { title: "Note interne : résultats trimestriels", text: "To: All sales staff\nFrom: Mark Evans\nRe: Quarterly results\nI am delighted to report that our sales [1] by 12% this quarter. This success is largely due to the [2] work of the regional teams. To celebrate, we will hold a team lunch on Friday at Bellini’s. Please let my assistant know by Wednesday [3] you will attend. I look forward to [4] you all there.",
+   blanks: [["rose","raised","risen","rising"],["hard","hardly","hardness","harden"],["whether","unless","although","despite"],["seeing","see","seen","to see"]] }
+],
+p7: [
+ { title: "Publicité", text: "BRIGHTDESK — Office furniture rental\nMoving into a new office? BrightDesk rents desks, chairs and meeting tables by the month. Free delivery within 30 km of the city center. Sign a contract of 12 months or more before June 30 and get the first month free. Call 555-0142 to request a quote.",
+   qs: [["What does BrightDesk offer?","Furniture rental for offices","Office cleaning services","Interior design courses","Used computers for sale"],["How can a customer get a free month?","By signing a long contract before June 30","By living near the city center","By renting more than ten desks","By calling before 9 a.m."],["What is said about delivery?","It is free within a certain distance","It takes 30 days","It is only available in June","It costs extra for chairs"]] },
+ { title: "E-mail", text: "From: Sofia Ruiz\nTo: James Holt\nSubject: Thursday’s training session\nHi James,\nI’m afraid I won’t be able to lead Thursday’s training session on the new booking system. My flight back from Madrid has been moved to Thursday evening. Could you ask Priya to take my place? She helped design the system and knows it very well. I’ve attached my slides. I’ll be back in the office on Friday and can answer any questions then.\nThanks,\nSofia",
+   qs: [["Why is Sofia writing?","To explain that she cannot lead a session","To book a flight to Madrid","To invite James to a training","To complain about a new system"],["Who most likely is Priya?","A colleague who knows the booking system well","Sofia’s travel agent","A new trainee","James’s manager"],["What did Sofia send with the e-mail?","Presentation slides","A flight ticket","A training schedule","A contract"]] },
+ { title: "Avis aux occupants", text: "NOTICE TO ALL TENANTS — Harbor View Building\nThe main elevator will be closed for maintenance from Monday, May 12, to Wednesday, May 14. During this time, please use the service elevator at the back of the building. Deliveries should be scheduled for Thursday or later. We apologize for any inconvenience.\nBuilding Management",
+   qs: [["What is the purpose of the notice?","To announce temporary elevator maintenance","To introduce a new delivery company","To welcome new tenants","To advertise office space"],["How long will the work last?","Three days","One day","One week","Two weeks"],["What are tenants asked to do?","Schedule deliveries for Thursday or later","Use the stairs only","Call building management","Move to another building"]] }
+],
+p34: [
+ { title: "Conversation", lines: [["W","Hi, I’m calling about the conference room I reserved for tomorrow at two."],["M","Yes, Ms. Grant. Is there a problem?"],["W","We now have fifteen people coming instead of eight. Do you have a bigger room?"],["M","Room 4B seats twenty, and it’s free tomorrow afternoon. I’ll switch your booking."],["W","Perfect. Could you also arrange coffee for the group?"],["M","Of course. It’ll be ready by two."]],
+   qs: [["Why is the woman calling?","To change a room reservation","To cancel a meeting","To order lunch","To complain about a room"],["How many people will attend the meeting?","Fifteen","Eight","Twenty","Two"],["What does the woman ask the man to do?","Arrange coffee","Send an invoice","Call the participants","Prepare a projector"]] },
+ { title: "Annonce", lines: [["M","Attention, passengers. The ten fifteen train to Boston will depart from platform six instead of platform two, due to track repairs. The train is expected to leave about ten minutes late. Refreshments are available in the café car at the front of the train. We apologize for the delay."]],
+   qs: [["Where is the announcement most likely being made?","At a train station","At an airport","In a hotel","In a shopping mall"],["Why has the platform changed?","Because of track repairs","Because of bad weather","Because the train is full","Because of a strike"],["Where can passengers get refreshments?","At the front of the train","On platform two","In the waiting room","At the ticket office"]] },
+ { title: "Conversation", lines: [["M","Have you seen the sales figures for March?"],["W","Yes. Online sales are up, but our store in the city center sold less than expected."],["M","I think the road works outside are keeping customers away."],["W","Probably. Maybe we should offer free delivery in that area until the works are finished."],["M","Good idea. Let’s discuss it with the director on Monday."]],
+   qs: [["What are the speakers mainly discussing?","Sales results","A job interview","A delivery problem","A new store opening"],["According to the man, why did the store sell less?","Road works are keeping customers away","Prices are too high","There are not enough staff","The store opened late"],["What will the speakers do on Monday?","Talk to the director","Start the road works","Open a new store","Send free products"]] }
+]
+};
+const PARTS = {
+  p2: { n: "Partie 2 · Questions-réponses", d: "Écoute une question et choisis la réponse logique parmi 3.", L: true },
+  p34: { n: "Parties 3-4 · Conversations et annonces", d: "Écoute un dialogue ou une annonce, puis réponds.", L: true },
+  p5: { n: "Partie 5 · Phrases à compléter", d: "Grammaire et vocabulaire en contexte professionnel.", L: false },
+  p6: { n: "Partie 6 · Textes à compléter", d: "E-mails, notes et annonces avec 4 blancs.", L: false },
+  p7: { n: "Partie 7 · Compréhension écrite", d: "Lis un document et réponds aux questions.", L: false }
+};
+let toe = null, toeGen = { loading: null, error: '' };
+function tMcq(part, ctx, q, arr, expl){ const opts = shuffle(arr); return { part, ctx, q, opts, a: opts.indexOf(arr[0]), expl: expl || '' }; }
+function tP2(list){ return list.map(x => { const o = shuffle(x.slice(1, 4)); return { part: 'p2', q: x[0], opts: o, a: o.indexOf(x[1]) }; }); }
+function tP5(list){ return list.map(x => tMcq('p5', null, x[0], x.slice(1, 5), x[5])); }
+function tP6(t){ return t.blanks.map((b, k) => tMcq('p6', { kind: 'text', title: t.title, body: t.text, blank: k + 1 }, 'Quel mot convient pour le blanc (' + (k + 1) + ') ?', b)); }
+function tP7(d){ const ctx = { kind: 'text', title: d.title, body: d.text }; return d.qs.map(x => tMcq('p7', ctx, x[0], x.slice(1, 5))); }
+function tP34(c){ const ctx = { kind: 'audio', title: c.title, lines: c.lines }; return c.qs.map(x => tMcq('p34', ctx, x[0], x.slice(1, 5))); }
+function buildPart(p){
+  if (p === 'p2') return tP2(shuffle(TOE.p2).slice(0, 8));
+  if (p === 'p5') return tP5(shuffle(TOE.p5).slice(0, 10));
+  if (p === 'p6') return shuffle(TOE.p6).slice(0, 2).flatMap(tP6);
+  if (p === 'p7') return shuffle(TOE.p7).slice(0, 2).flatMap(tP7);
+  return shuffle(TOE.p34).slice(0, 2).flatMap(tP34);
+}
+function buildExam(){
+  return [].concat(tP2(shuffle(TOE.p2).slice(0, 5)), tP34(shuffle(TOE.p34)[0]), tP5(shuffle(TOE.p5).slice(0, 8)), tP6(shuffle(TOE.p6)[0]), tP7(shuffle(TOE.p7)[0]));
+}
+function startToe(items, opts){
+  toe = Object.assign({ items, i: 0, answered: null, res: [], exam: false, part: null, ai: false, showText: false, start: Date.now(), saved: false }, opts || {});
+  quiz = null; renderQuiz(); window.scrollTo(0, 0); autoPlay(null);
+}
+function speakSeq(seq){
+  if (!canSpeak) return;
+  speechSynthesis.cancel();
+  const all = speechSynthesis.getVoices().filter(v => /^en/i.test(v.lang || ''));
+  const pref = all.filter(v => v.lang.replace('_', '-').toLowerCase().startsWith(state.settings.accent.toLowerCase()));
+  const pool = pref.length ? pref : all;
+  seq.forEach(s => {
+    const u = new SpeechSynthesisUtterance(s.text);
+    u.lang = state.settings.accent; u.rate = 0.95;
+    const v = s.who === 'W' ? (pool[1] || pool[0]) : pool[0];
+    if (v) u.voice = v;
+    u.pitch = s.who === 'W' ? 1.2 : (s.who === 'M' ? 0.9 : 1);
+    speechSynthesis.speak(u);
+  });
+}
+function playItem(it){
+  if (!it) return;
+  if (it.part === 'p2') speakSeq([{ text: it.q, who: 'M' }].concat(it.opts.map((o, k) => ({ text: 'ABC'[k] + '. ' + o, who: 'W' }))));
+  else if (it.ctx && it.ctx.kind === 'audio') speakSeq(it.ctx.lines.map(l => ({ text: l[1], who: l[0] })));
+}
+function autoPlay(prev){
+  const it = toe && toe.items[toe.i];
+  if (!it) return;
+  if (it.part === 'p2' || (it.ctx && it.ctx.kind === 'audio' && (!prev || prev.ctx !== it.ctx))) playItem(it);
+}
+function fmtTime(ms){ const s = Math.floor(ms / 1000); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+setInterval(() => { const e = document.getElementById('toe-timer'); if (e && toe && toe.exam) e.textContent = '⏱ ' + fmtTime(Date.now() - toe.start) + ' / 15:00'; }, 1000);
+function partRow(p){
+  const ai = sample && (p === 'p2' || p === 'p5' || p === 'p7');
+  return '<div style="margin-top:8px"><button class="lesson" style="width:100%" data-act="toe-part" data-p="' + p + '"><span><b>' + PARTS[p].n + '</b><small>' + PARTS[p].d + '</small></span><span class="gscore">▶</span></button>' +
+    (ai ? '<button class="linkish" data-act="toe-ai" data-p="' + p + '"' + (toeGen.loading ? ' disabled' : '') + '>' + (toeGen.loading === p ? 'Claude prépare une série…' : '+ Nouvelle série générée par Claude') + '</button>' : '') + '</div>';
+}
+function quizMenu(){
+  const hist = (state.toeic || []).slice(-5).reverse();
+  return '<div class="panel"><h2 style="margin-top:0">Quiz de mes mots</h2><p class="muted small">10 questions dans les deux sens. Les mots ratés reviennent dans ta prochaine révision.</p>' +
+    (state.words.length >= 4 ? '<button class="btn primary" data-act="quiz-start">Commencer le quiz</button>' : '<p class="muted small">Ajoute au moins 4 mots dans « Mes mots » pour lancer ce quiz.</p>') + '</div>' +
+    '<div class="panel"><h2 style="margin-top:0">Entraînement type TOEIC</h2><p class="muted small">Questions originales inspirées du format de l’examen, en contexte professionnel. Ce n’est pas un test officiel.</p>' +
+    '<button class="btn primary" style="width:100%" data-act="toe-exam">Examen blanc express (23 questions, ≈ 15 min)</button>' +
+    '<div class="q-prompt" style="margin-top:18px">🎧 Écoute</div>' + partRow('p2') + partRow('p34') +
+    '<div class="q-prompt" style="margin-top:18px">📄 Lecture</div>' + partRow('p5') + partRow('p6') + partRow('p7') +
+    (toeGen.error ? '<p class="err">' + esc(toeGen.error) + '</p>' : '') +
+    (canSpeak ? '' : '<p class="muted small" style="margin-top:12px">La voix n’est pas disponible sur cet appareil : le texte des parties d’écoute sera affiché.</p>') +
+    (hist.length ? '<div class="q-prompt" style="margin-top:18px">Mes examens blancs</div><ul class="mini">' + hist.map(h => '<li>' + esc(h.d) + ' · Écoute ' + h.L[0] + '/' + h.L[1] + ' · Lecture ' + h.R[0] + '/' + h.R[1] + ' · ' + fmtTime(h.t) + '</li>').join('') + '</ul>' : '') +
+    '</div>';
+}
+function toeResults(){
+  const t = toe, by = {};
+  t.res.forEach(r => { by[r.part] = by[r.part] || [0, 0]; by[r.part][1]++; if (r.ok) by[r.part][0]++; });
+  const sum = keys => keys.reduce((a, k) => by[k] ? [a[0] + by[k][0], a[1] + by[k][1]] : a, [0, 0]);
+  return { by, L: sum(['p2', 'p34']), R: sum(['p5', 'p6', 'p7']), total: sum(['p2', 'p34', 'p5', 'p6', 'p7']) };
+}
+function renderToeic(el){
+  const t = toe;
+  if (t.i >= t.items.length){
+    const r = toeResults(), pct = Math.round(100 * r.total[0] / Math.max(1, r.total[1]));
+    el.innerHTML = '<div class="panel empty"><div class="q-prompt">' + (t.exam ? 'Examen blanc express' : PARTS[t.part].n) + '</div><div class="score">' + r.total[0] + '/' + r.total[1] + '</div>' +
+      '<p>' + (pct >= 85 ? 'Excellent résultat !' : pct >= 65 ? 'Bon résultat, continue comme ça.' : 'Continue à t’entraîner, les progrès viennent vite.') + '</p>' +
+      (t.exam ? '<p><b>Écoute :</b> ' + r.L[0] + '/' + r.L[1] + ' · <b>Lecture :</b> ' + r.R[0] + '/' + r.R[1] + '<br><span class="muted small">Temps : ' + fmtTime(t.end - t.start) + '</span></p>' : '') +
+      '<ul class="mini" style="text-align:left;display:inline-block">' + Object.keys(PARTS).filter(k => r.by[k]).map(k => '<li>' + PARTS[k].n + ' : <b>' + r.by[k][0] + '/' + r.by[k][1] + '</b></li>').join('') + '</ul>' +
+      '<p class="muted small">Résultat indicatif : ce n’est pas un score TOEIC officiel.</p>' +
+      '<div class="row">' + (t.ai ? '' : '<button class="btn primary" data-act="toe-again">Nouvelle série</button>') + '<button class="btn" data-act="quiz-menu">Menu des quiz</button></div></div>';
+    return;
+  }
+  const it = t.items[t.i], n = t.items.length, done = t.answered !== null;
+  const reveal = done || t.showText || !canSpeak;
+  let html = '<div class="progress" aria-hidden="true"><i style="width:' + Math.round(100 * t.i / n) + '%"></i></div>' +
+    '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px"><span class="q-prompt">' + PARTS[it.part].n + '</span>' + (t.exam ? '<span id="toe-timer" class="muted small">⏱ ' + fmtTime(Date.now() - t.start) + ' / 15:00</span>' : '') + '</div>';
+  if (it.part === 'p2'){
+    html += '<div class="panel"><p class="muted small" style="margin:0 0 10px">Écoute la question puis les réponses A, B et C. Choisis la réponse la plus logique.</p>' +
+      (canSpeak ? '<button class="btn" data-act="toe-play">▶ Écouter</button>' : '') +
+      (reveal ? '<p style="font-weight:700;margin:12px 0 0">' + esc(it.q) + '</p>' : '') +
+      '<div class="options" style="margin-top:14px">' + it.opts.map((o, k) => {
+        let cls = 'opt';
+        if (done){ if (k === it.a) cls += ' right'; else if (k === t.answered) cls += ' wrong'; }
+        return '<button class="' + cls + '" data-act="toe-answer" data-k="' + k + '"' + (done ? ' disabled' : '') + '><b>' + 'ABC'[k] + '</b>' + (reveal ? ' · ' + esc(o) : '') + '</button>';
+      }).join('') + '</div>' +
+      (!reveal ? '<button class="linkish" style="margin-top:10px" data-act="toe-text">Afficher le texte</button>' : '') + '</div>';
+  } else {
+    const c = it.ctx;
+    if (c && c.kind === 'audio'){
+      html += '<div class="panel"><p class="muted small" style="margin:0 0 10px">' + esc(c.title) + ' : écoute, puis réponds à la question.</p>' +
+        (canSpeak ? '<button class="btn" data-act="toe-play">▶ Écouter</button>' : '') +
+        (reveal ? '<div class="doc" style="margin-top:12px">' + c.lines.map(l => (c.lines.length > 1 ? '<b>' + (l[0] === 'W' ? 'Woman' : 'Man') + ':</b> ' : '') + esc(l[1])).join('<br>') + '</div>'
+                : '<div><button class="linkish" style="margin-top:10px" data-act="toe-text">Afficher la transcription</button></div>') + '</div>';
+    } else if (c){
+      const body = esc(c.body).replace(/\[(\d)\]/g, (m, d) => +d === c.blank ? '<mark>(' + d + ') ________</mark>' : '(' + d + ') ________').replace(/\n/g, '<br>');
+      html += '<div class="panel"><div class="q-prompt">' + esc(c.title) + '</div><div class="doc">' + body + '</div></div>';
+    }
+    html += '<div class="panel"><p style="font-size:1.15rem;font-weight:700;margin:0 0 14px">' + esc(it.q) + '</p><div class="options">' + it.opts.map((o, k) => {
+      let cls = 'opt';
+      if (done){ if (k === it.a) cls += ' right'; else if (k === t.answered) cls += ' wrong'; }
+      return '<button class="' + cls + '" data-act="toe-answer" data-k="' + k + '"' + (done ? ' disabled' : '') + '>' + esc(o) + '</button>';
+    }).join('') + '</div></div>';
+  }
+  if (done){
+    html += '<div class="panel" style="margin-top:-4px">' + (t.answered === it.a ? '<b style="color:var(--good)">Bonne réponse !</b>' : '<b style="color:var(--bad)">La bonne réponse : </b>' + esc(it.opts[it.a])) +
+      (it.expl ? '<p class="small" style="margin:6px 0 0">' + esc(it.expl) + '</p>' : '') +
+      '<div class="row" style="margin-top:12px"><button class="btn primary" data-act="toe-next">' + (t.i === n - 1 ? 'Voir mon résultat' : 'Question suivante') + '</button></div></div>';
+  }
+  html += '<p class="muted small">Question ' + (t.i + 1) + ' sur ' + n + ' <button class="linkish" data-act="quiz-menu" style="margin-left:8px">Quitter</button></p>';
+  el.innerHTML = html;
+}
+async function genToe(p){
+  toeGen = { loading: p, error: '' }; renderQuiz();
+  const lv = lvl();
+  const prompts = {
+    p2: 'Write 8 original TOEIC-style Part 2 (question-response) items set in workplace situations, suited to a learner around CEFR ' + lv + '. Each item: a short spoken question or statement, and 3 short responses where the first is the only logical reply; include typical TOEIC traps (similar-sounding words, yes/no answers to wh-questions, wrong tense). Return only a JSON array of 8 objects: {"q": string, "o": [correct, wrong, wrong]}.',
+    p5: 'Write 10 original TOEIC-style Part 5 (incomplete sentences) questions set in business contexts, suited to a learner around CEFR ' + lv + '. Each: one English sentence with one gap written ___, 4 options where the first is the only correct one (test word forms, verb tenses, prepositions, connectors, vocabulary), and a one-sentence explanation in French. Return only a JSON array of 10 objects: {"q": string, "o": [correct, wrong, wrong, wrong], "expl": string}.',
+    p7: 'Write 2 original TOEIC-style Part 7 reading documents (for example an e-mail, a notice, an advertisement or a memo), 60 to 110 words each, suited to a learner around CEFR ' + lv + '. Each document has 3 multiple-choice comprehension questions with 4 options; the first option is the only correct one. Return only a JSON array of 2 objects: {"title": string (a short French label such as "E-mail" or "Annonce"), "text": string, "qs": [{"q": string, "o": [correct, wrong, wrong, wrong]}]}.'
+  };
+  try {
+    const out = await sample.json(prompts[p], { modelTier: 'quick', cache: false });
+    const arr = Array.isArray(out) ? out : (out && (out.items || out.questions || out.documents)) || [];
+    const okOpts = (o, len) => Array.isArray(o) && o.length === len && new Set(o.map(String)).size === len;
+    let items = [];
+    if (p === 'p2') items = tP2(arr.filter(x => x && x.q && okOpts(x.o, 3)).map(x => [String(x.q)].concat(x.o.map(String))));
+    if (p === 'p5') items = tP5(arr.filter(x => x && x.q && okOpts(x.o, 4)).map(x => [String(x.q)].concat(x.o.map(String), [String(x.expl || '')])));
+    if (p === 'p7') items = arr.filter(d => d && d.text && Array.isArray(d.qs)).flatMap(d => tP7({ title: String(d.title || 'Document'), text: String(d.text), qs: d.qs.filter(q => q && q.q && okOpts(q.o, 4)).map(q => [String(q.q)].concat(q.o.map(String))) }));
+    toeGen = { loading: null, error: '' };
+    if (!items.length){ toeGen.error = 'Aucune question reçue. Réessaie.'; return renderQuiz(); }
+    if (current !== 'quiz' || toe || quiz) return;
+    startToe(items, { part: p, ai: true });
+  } catch(e){ toeGen = { loading: null, error: sampleError(e) }; renderQuiz(); }
 }
 
 // ---------- Mes mots ----------
@@ -940,7 +1160,7 @@ function renderChat(){
   const el = $('tab-parler');
   if (!sampleChecked){ el.innerHTML = '<div class="panel empty"><p class="muted">Chargement…</p></div>'; return; }
   if (!sample){
-    el.innerHTML = '<div class="panel empty"><div class="big">Conversation</div><p>La conversation avec l’IA, les listes par thème générées par Claude et les exercices de grammaire supplémentaires ne sont pas disponibles dans la version hors ligne.</p><p>Pour discuter en anglais, ouvre la version Claude de l’app (connexion internet nécessaire).</p><a class="btn primary" style="display:inline-block;text-decoration:none;line-height:22px" href="https://claude.ai/artifact/87UKEBmq4RVgY3bX8mSSha" target="_blank" rel="noopener">Ouvrir la version Claude</a></div>';
+    el.innerHTML = '<div class="panel empty"><div class="big">Conversation</div><p>La conversation avec l’IA et les séries générées par Claude ne sont pas disponibles dans la version hors ligne.</p><p>Pour discuter en anglais, ouvre la version Claude de l’app (connexion internet nécessaire).</p><a class="btn primary" style="display:inline-block;text-decoration:none;line-height:22px" href="https://claude.ai/artifact/87UKEBmq4RVgY3bX8mSSha" target="_blank" rel="noopener">Ouvrir la version Claude</a></div>';
     return;
   }
   const lv = lvl();
@@ -1014,6 +1234,33 @@ document.addEventListener('click', e => {
       const keep = state.settings; state = freshState(); state.settings = keep; if (keep.level) addPack(keep.level); session = null; quiz = null; save(); renderAll();
     }
     return;
+  }
+  if (act === 'quiz-menu'){ quiz = null; toe = null; if (canSpeak) speechSynthesis.cancel(); renderQuiz(); window.scrollTo(0, 0); return; }
+  if (act === 'toe-part') return startToe(buildPart(t.dataset.p), { part: t.dataset.p });
+  if (act === 'toe-exam') return startToe(buildExam(), { exam: true });
+  if (act === 'toe-again') return toe.exam ? startToe(buildExam(), { exam: true }) : startToe(buildPart(toe.part), { part: toe.part });
+  if (act === 'toe-ai'){ if (sample && !toeGen.loading) genToe(t.dataset.p); return; }
+  if (act === 'toe-play'){ playItem(toe && toe.items[toe.i]); return; }
+  if (act === 'toe-text'){ toe.showText = true; return renderQuiz(); }
+  if (act === 'toe-answer'){
+    if (!toe || toe.answered !== null) return;
+    const it = toe.items[toe.i]; toe.answered = +t.dataset.k;
+    toe.res.push({ part: it.part, ok: toe.answered === it.a });
+    return renderQuiz();
+  }
+  if (act === 'toe-next'){
+    const prev = toe.items[toe.i];
+    toe.i++; toe.answered = null; toe.showText = false;
+    if (toe.i >= toe.items.length && !toe.saved){
+      toe.saved = true; toe.end = Date.now(); if (canSpeak) speechSynthesis.cancel();
+      if (toe.exam){
+        const r = toeResults(), d = new Date();
+        state.toeic.push({ d: d.getDate() + '/' + (d.getMonth() + 1), L: r.L, R: r.R, t: toe.end - toe.start });
+        state.toeic = state.toeic.slice(-10);
+      }
+      markActivity(); save();
+    }
+    renderQuiz(); window.scrollTo(0, 0); autoPlay(prev); return;
   }
   if (act === 'list-level'){ listLevel = t.dataset.l; return renderWords(); }
   if (act === 'add-list'){
